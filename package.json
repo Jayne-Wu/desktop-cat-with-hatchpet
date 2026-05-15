@@ -1,0 +1,16 @@
+{
+  "name": "desktop-cat-with-hatchpet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A desktop pet runtime that reuses Codex/Hatchpet pet assets.",
+  "type": "module",
+  "main": "app/main/electron-main.mjs",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "validate:pets": "node scripts/validate-pets.mjs"
+  },
+  "devDependencies": {
+    "electron": "^42.1.0"
+  }
+}

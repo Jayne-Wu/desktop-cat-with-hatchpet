@@ -1,0 +1,45 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+body {
+  display: grid;
+  place-items: center;
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  color: #fff;
+  user-select: none;
+}
+
+#petCanvas {
+  width: 280px;
+  height: 300px;
+  image-rendering: auto;
+}
+
+.error-state {
+  position: fixed;
+  inset: 12px;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  border-radius: 8px;
+  color: #fecaca;
+  background: rgba(91, 22, 31, 0.86);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
