@@ -8,9 +8,34 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "validate:pets": "node scripts/validate-pets.mjs"
+    "validate:pets": "node scripts/validate-pets.mjs",
+    "pack": "electron-builder --dir",
+    "dist:win": "electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "com.jaynewu.desktopcat",
+    "productName": "Desktop Cat",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "app/**/*",
+      "package.json",
+      "pets/xigua/pet.json",
+      "pets/xigua/spritesheet.webp"
+    ],
+    "win": {
+      "target": "nsis",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "devDependencies": {
-    "electron": "^42.1.0"
+    "electron": "^42.1.0",
+    "electron-builder": "^26.8.1"
   }
 }
