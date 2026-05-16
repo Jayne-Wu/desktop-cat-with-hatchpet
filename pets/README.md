@@ -1,12 +1,14 @@
 # Pets Directory
 
-Place Codex/Hatchpet-compatible pets here:
+This directory stores Codex/Hatchpet-compatible pet assets.
 
 ```text
 pets/
-  my-pet/
+  xigua/
     pet.json
     spritesheet.webp
 ```
 
-The current runtime scans this folder at startup and exposes discovered pets to the renderer.
+`xigua` is the built-in default pet for the app and is included in the repository.
+
+Other local test pets can be placed in sibling folders, but they are ignored by Git unless explicitly allow-listed in `.gitignore`.
