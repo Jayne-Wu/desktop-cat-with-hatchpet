@@ -10,6 +10,9 @@ release/
 
 pets/*
 !pets/README.md
+!pets/simba/
+!pets/simba/pet.json
+!pets/simba/spritesheet.webp
 !pets/xigua/
 !pets/xigua/pet.json
 !pets/xigua/spritesheet.webp

@@ -119,6 +119,17 @@ export async function getPetSpritesheetDataUrl(appRoot, petId) {
   return `data:image/webp;base64,${data.toString("base64")}`;
 }
 
+export async function getPetById(appRoot, petId) {
+  const registry = await listLocalPets(appRoot);
+  const pet = registry.pets.find((entry) => entry.id === petId);
+
+  if (!pet) {
+    throw new Error(`Pet not found: ${petId}`);
+  }
+
+  return pet;
+}
+
 export async function getDefaultPet(appRoot) {
   const registry = await listLocalPets(appRoot);
   const pet = registry.pets.find((entry) => entry.id === DEFAULT_PET_ID);
@@ -129,6 +140,19 @@ export async function getDefaultPet(appRoot) {
   }
 
   return pet;
+}
+
+export async function getStartupPet(appRoot, preferredPetId) {
+  if (preferredPetId) {
+    const registry = await listLocalPets(appRoot);
+    const preferredPet = registry.pets.find((entry) => entry.id === preferredPetId);
+
+    if (preferredPet) {
+      return preferredPet;
+    }
+  }
+
+  return getDefaultPet(appRoot);
 }
 
 function validateManifest(manifest) {

@@ -3,7 +3,8 @@ import path from "node:path";
 
 const DEFAULT_SETTINGS = {
   selectedPetId: null,
-  scale: 1.25
+  scale: 1.25,
+  windowPosition: null
 };
 
 export async function readSettings(userDataPath) {
@@ -36,12 +37,32 @@ function getSettingsPath(userDataPath) {
 
 function normalizeSettings(settings) {
   const scale = Number(settings?.scale);
+  const position = normalizeWindowPosition(settings?.windowPosition);
 
   return {
     selectedPetId:
       typeof settings?.selectedPetId === "string" && settings.selectedPetId.trim() !== ""
         ? settings.selectedPetId
         : null,
-    scale: Number.isFinite(scale) ? Math.min(2, Math.max(1, scale)) : DEFAULT_SETTINGS.scale
+    scale: Number.isFinite(scale) ? Math.min(2, Math.max(1, scale)) : DEFAULT_SETTINGS.scale,
+    windowPosition: position
+  };
+}
+
+function normalizeWindowPosition(position) {
+  if (!position || typeof position !== "object") {
+    return null;
+  }
+
+  const x = Number(position.x);
+  const y = Number(position.y);
+
+  if (!Number.isFinite(x) || !Number.isFinite(y)) {
+    return null;
+  }
+
+  return {
+    x: Math.round(x),
+    y: Math.round(y)
   };
 }

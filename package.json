@@ -22,8 +22,8 @@
     "files": [
       "app/**/*",
       "package.json",
-      "pets/xigua/pet.json",
-      "pets/xigua/spritesheet.webp"
+      "pets/**/pet.json",
+      "pets/**/spritesheet.webp"
     ],
     "win": {
       "target": "nsis",

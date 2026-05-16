@@ -1,56 +1,104 @@
 import { Menu, Tray, nativeImage } from "electron";
 
-export function createTray(mainWindow) {
-  const emptyIcon = nativeImage.createEmpty();
-  const tray = new Tray(emptyIcon);
+const SCALE_OPTIONS = [
+  ["Small", 1],
+  ["Medium", 1.15],
+  ["Large", 1.25]
+];
 
-  const refreshMenu = () => {
-    const pinned = mainWindow?.isAlwaysOnTop?.() ?? true;
-
-    const menu = Menu.buildFromTemplate([
-      {
-        label: pinned ? "Unpin Window" : "Pin Window",
-        click: () => {
-          const nextPinned = !mainWindow.isAlwaysOnTop();
-          mainWindow.setAlwaysOnTop(nextPinned, "screen-saver");
-          refreshMenu();
-        }
-      },
-      {
-        label: "Show",
-        click: () => {
-          mainWindow.show();
-          mainWindow.focus();
-        }
-      },
-      {
-        label: "Hide",
-        click: () => {
-          mainWindow.hide();
-        }
-      },
-      {
-        type: "separator"
-      },
-      {
-        label: "Quit",
-        role: "quit"
-      }
-    ]);
-
-    tray.setContextMenu(menu);
-  };
-
+export function createTray() {
+  const tray = new Tray(nativeImage.createEmpty());
   tray.setToolTip("Desktop Pet");
-  refreshMenu();
-  tray.on("click", () => {
-    if (mainWindow.isVisible()) {
-      mainWindow.hide();
-    } else {
-      mainWindow.show();
-      mainWindow.focus();
-    }
-  });
-
   return tray;
+}
+
+export function buildTrayMenu({
+  mainWindow,
+  pets,
+  selectedPetId,
+  scale,
+  onSelectPet,
+  onSelectScale,
+  onResetPosition,
+  onTogglePin
+}) {
+  const pinned = mainWindow?.isAlwaysOnTop?.() ?? true;
+  const visible = mainWindow?.isVisible?.() ?? true;
+
+  return Menu.buildFromTemplate([
+    {
+      label: "Pets",
+      submenu: buildPetItems(pets, selectedPetId, onSelectPet)
+    },
+    {
+      label: "Size",
+      submenu: buildScaleItems(scale, onSelectScale)
+    },
+    {
+      label: "Reset Position",
+      submenu: [
+        {
+          label: "Center",
+          click: () => onResetPosition("center")
+        },
+        {
+          label: "Bottom Right",
+          click: () => onResetPosition("bottom-right")
+        }
+      ]
+    },
+    {
+      type: "separator"
+    },
+    {
+      label: pinned ? "Unpin Window" : "Pin Window",
+      click: onTogglePin
+    },
+    {
+      label: visible ? "Hide" : "Show",
+      click: () => {
+        if (visible) {
+          mainWindow.hide();
+          return;
+        }
+
+        mainWindow.show();
+        mainWindow.focus();
+      }
+    },
+    {
+      type: "separator"
+    },
+    {
+      label: "Quit",
+      role: "quit"
+    }
+  ]);
+}
+
+function buildPetItems(pets, selectedPetId, onSelectPet) {
+  if (pets.length === 0) {
+    return [
+      {
+        label: "No pets found",
+        enabled: false
+      }
+    ];
+  }
+
+  return pets.map((pet) => ({
+    label: pet.displayName,
+    type: "radio",
+    checked: pet.id === selectedPetId,
+    click: () => onSelectPet(pet.id)
+  }));
+}
+
+function buildScaleItems(scale, onSelectScale) {
+  return SCALE_OPTIONS.map(([label, value]) => ({
+    label,
+    type: "radio",
+    checked: Math.abs(scale - value) < 0.001,
+    click: () => onSelectScale(value)
+  }));
 }

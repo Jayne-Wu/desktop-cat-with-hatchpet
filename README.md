@@ -120,7 +120,6 @@ desktop-cat-with-hatchpet/
 - `docs/architecture.md`：分层架构和数据流。
 - `docs/pet-format.md`：Hatchpet/Codex 资源格式说明。
 - `docs/runtime-states.md`：9 个动画状态在桌宠中的语义。
-- `docs/roadmap.md`：早期里程碑记录。
 - `pets/README.md`：本地宠物资源目录说明。
 - `scripts/validate-pets.mjs`：本地宠物资源校验脚本。
 
