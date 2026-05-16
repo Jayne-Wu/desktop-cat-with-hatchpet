@@ -33,7 +33,7 @@ jobs:
       - name: Build Windows installer
         env:
           ELECTRON_BUILDER_CACHE: ${{ github.workspace }}\.tools\electron-builder-cache
-        run: npm run dist:win
+        run: npm run dist:win -- --publish never
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
@@ -53,9 +53,12 @@ jobs:
           TAG_NAME: ${{ github.ref_name }}
         run: |
           $files = @()
-          $files += Get-ChildItem -Path "dist\*.exe" | ForEach-Object { $_.FullName }
-          $files += Get-ChildItem -Path "dist\*.blockmap" | ForEach-Object { $_.FullName }
-          $files += Get-Item -Path "dist\latest.yml" | ForEach-Object { $_.FullName }
+          $files += Get-ChildItem -Path "dist\*.exe" -ErrorAction Stop | ForEach-Object { $_.FullName }
+          $files += Get-ChildItem -Path "dist\*.blockmap" -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName }
+
+          if (Test-Path "dist\latest.yml") {
+            $files += Get-Item -Path "dist\latest.yml" | ForEach-Object { $_.FullName }
+          }
 
           gh release view $env:TAG_NAME *> $null
 
