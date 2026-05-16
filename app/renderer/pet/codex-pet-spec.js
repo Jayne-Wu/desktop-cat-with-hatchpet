@@ -21,6 +21,10 @@ export function getStateSpec(stateId) {
   return ATLAS_STATES.find((state) => state.id === stateId) ?? ATLAS_STATES[0];
 }
 
+export function getStateCycleDurationMs(stateId) {
+  return getStateSpec(stateId).durationsMs.reduce((total, duration) => total + duration, 0);
+}
+
 export function validateCodexPetSpec(statesById) {
   for (const state of ATLAS_STATES) {
     const actual = statesById[state.id];

@@ -1,9 +1,10 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { DEFAULT_SCALE, normalizeScale } from "../shared/scale-options.mjs";
 
 const DEFAULT_SETTINGS = {
   selectedPetId: null,
-  scale: 0.92,
+  scale: DEFAULT_SCALE,
   windowPosition: null
 };
 
@@ -44,7 +45,7 @@ function normalizeSettings(settings) {
       typeof settings?.selectedPetId === "string" && settings.selectedPetId.trim() !== ""
         ? settings.selectedPetId
         : null,
-    scale: Number.isFinite(scale) ? Math.min(1.12, Math.max(0.72, scale)) : DEFAULT_SETTINGS.scale,
+    scale: normalizeScale(scale),
     windowPosition: position
   };
 }

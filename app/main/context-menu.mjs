@@ -1,4 +1,5 @@
 import { Menu, app } from "electron";
+import { SCALE_OPTIONS } from "../shared/scale-options.mjs";
 
 const ACTIONS = [
   ["Idle", "idle"],
@@ -10,12 +11,6 @@ const ACTIONS = [
   ["Failed", "failed"],
   ["Move Left", "running-left"],
   ["Move Right", "running-right"]
-];
-
-const SCALE_OPTIONS = [
-  ["Small", 0.72],
-  ["Medium", 0.92],
-  ["Large", 1.12]
 ];
 
 export function showPetContextMenu({
@@ -112,10 +107,10 @@ function buildPetItems(pets, selectedPetId, onSelectPet) {
 }
 
 function buildScaleItems(scale, onSelectScale) {
-  return SCALE_OPTIONS.map(([label, value]) => ({
-    label,
+  return SCALE_OPTIONS.map((option) => ({
+    label: option.label,
     type: "radio",
-    checked: Math.abs(scale - value) < 0.001,
-    click: () => onSelectScale(value)
+    checked: Math.abs(scale - option.value) < 0.001,
+    click: () => onSelectScale(option.value)
   }));
 }

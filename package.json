@@ -1,6 +1,6 @@
 {
   "name": "desktop-cat-with-hatchpet",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "private": true,
   "description": "A desktop pet runtime that reuses Codex/Hatchpet pet assets.",
   "type": "module",
@@ -9,12 +9,15 @@
     "start": "electron .",
     "dev": "electron .",
     "validate:pets": "node scripts/validate-pets.mjs",
+    "test:behavior": "node --test tests/pet-behavior.test.mjs",
+    "test": "node scripts/validate-pets.mjs && node --test tests/*.test.mjs",
     "pack": "electron-builder --dir",
     "dist:win": "electron-builder --win nsis"
   },
   "build": {
     "appId": "com.jaynewu.desktopcat",
     "productName": "Desktop Cat",
+    "artifactName": "DesktopCat-v${version}.${ext}",
     "asar": true,
     "directories": {
       "output": "dist"

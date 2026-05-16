@@ -2,6 +2,7 @@ import { loadPet } from "./pet/pet-loader.js";
 import { AtlasPlayer } from "./pet/atlas-player.js";
 import { PetBehavior } from "./pet/pet-behavior.js";
 import { PetRenderer } from "./pet/pet-renderer.js";
+import { DEFAULT_SCALE } from "../shared/scale-options.mjs";
 
 const canvas = document.querySelector("#petCanvas");
 const errorState = document.querySelector("#errorState");
@@ -50,7 +51,7 @@ async function loadStartupState() {
 }
 
 function applyScale(scale) {
-  renderer.setScale(Number(scale) || 0.92);
+  renderer.setScale(Number(scale) || DEFAULT_SCALE);
 }
 
 canvas.addEventListener("click", () => {
