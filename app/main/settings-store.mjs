@@ -3,7 +3,7 @@ import path from "node:path";
 
 const DEFAULT_SETTINGS = {
   selectedPetId: null,
-  scale: 1.25,
+  scale: 0.92,
   windowPosition: null
 };
 
@@ -44,7 +44,7 @@ function normalizeSettings(settings) {
       typeof settings?.selectedPetId === "string" && settings.selectedPetId.trim() !== ""
         ? settings.selectedPetId
         : null,
-    scale: Number.isFinite(scale) ? Math.min(2, Math.max(1, scale)) : DEFAULT_SETTINGS.scale,
+    scale: Number.isFinite(scale) ? Math.min(1.12, Math.max(0.72, scale)) : DEFAULT_SETTINGS.scale,
     windowPosition: position
   };
 }

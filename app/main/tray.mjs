@@ -1,9 +1,9 @@
 import { Menu, Tray, nativeImage } from "electron";
 
 const SCALE_OPTIONS = [
-  ["Small", 1],
-  ["Medium", 1.15],
-  ["Large", 1.25]
+  ["Small", 0.72],
+  ["Medium", 0.92],
+  ["Large", 1.12]
 ];
 
 export function createTray() {

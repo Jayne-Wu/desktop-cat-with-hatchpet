@@ -17,7 +17,7 @@ Desktop Cat With Hatchpet 是一个 Windows-first 的 Electron 桌面宠物运�
 
 ## Current Version
 
-`v1.0.0: Hatchpet 桌宠播放器版`
+`v1.1.1: 基础可用性版`
 
 当前版本的范围是稳定播放本地 Hatchpet/Codex 宠物资源，并提供基础桌面控制能力。已支持：
 
@@ -28,7 +28,9 @@ Desktop Cat With Hatchpet 是一个 Windows-first 的 Electron 桌面宠物运�
 - 右键菜单支持手动动作切换：`Idle`、`Wave`、`Jump`、`Waiting`、`Working`、`Review`、`Failed`、`Move Left`、`Move Right`。
 - 右键菜单支持窗口控制：`Pin / Unpin`、`Hide`、`Quit`。
 - 系统托盘支持显示、隐藏、置顶切换和退出。
-- 本地设置存储支持缩放等运行时设置。
+- 本地设置存储支持宠物选择、缩放和窗口位置等运行时设置。
+- 支持从右键菜单和托盘切换 `xigua` 与 `simba`。
+- 支持拖拽摆放、三档尺寸切换和一键重置位置。
 - `npm run validate:pets` 可以校验本地宠物 manifest 和 WebP atlas 尺寸。
 
 ## Quick Start
@@ -182,7 +184,7 @@ pets/xigua/spritesheet.webp
 
 触发方式：
 
-- 推送 `v*` 格式标签，例如 `v1.0.0`。
+- 推送 `v*` 格式标签，例如 `v1.1.1`。
 - 在 GitHub Actions 页面手动运行 `workflow_dispatch`。
 
 workflow 会在 GitHub 的 Windows runner 上执行：
@@ -197,8 +199,8 @@ workflow 会在 GitHub 的 Windows runner 上执行：
 发布标签示例：
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.1.1
+git push origin v1.1.1
 ```
 
 ### Private Pet Assets
@@ -219,7 +221,7 @@ pets/xigua/spritesheet.webp
 
 ## Roadmap
 
-当前版本作为 `v1.0.0` 固化，后续版本按“先好用，再像桌宠，再成为轻陪伴应用”的路线演进。
+当前版本作为 `v1.1.1` 固化，后续版本按“先好用，再像桌宠，再成为轻陪伴应用”的路线演进。
 
 ### v1.1.0 基础可用性版
 

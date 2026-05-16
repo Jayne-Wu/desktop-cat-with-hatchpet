@@ -2,7 +2,7 @@ export class PetRenderer {
   constructor(canvas) {
     this.canvas = canvas;
     this.context = canvas.getContext("2d");
-    this.scale = 1.25;
+    this.scale = 0.92;
   }
 
   setScale(scale) {

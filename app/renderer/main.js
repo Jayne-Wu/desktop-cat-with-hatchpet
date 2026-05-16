@@ -50,7 +50,7 @@ async function loadStartupState() {
 }
 
 function applyScale(scale) {
-  renderer.setScale(Number(scale) || 1.25);
+  renderer.setScale(Number(scale) || 0.92);
 }
 
 canvas.addEventListener("click", () => {
