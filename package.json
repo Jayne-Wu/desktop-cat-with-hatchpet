@@ -24,10 +24,13 @@
     },
     "files": [
       "app/**/*",
+      "build/icon.ico",
+      "build/icon.png",
       "package.json",
       "pets/**/pet.json",
       "pets/**/spritesheet.webp"
     ],
+    "icon": "build/icon.ico",
     "win": {
       "target": "nsis",
       "signAndEditExecutable": false

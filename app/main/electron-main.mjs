@@ -14,7 +14,7 @@ let positionPersistTimer = null;
 
 app.whenReady().then(async () => {
   const settings = await readSettings(app.getPath("userData"));
-  mainWindow = createMainWindow(settings);
+  mainWindow = createMainWindow(settings, app.getAppPath());
   movementController = new MovementController({
     mainWindow,
     onStateChange: (state) => {
@@ -23,7 +23,7 @@ app.whenReady().then(async () => {
     onPositionChanged: schedulePersistWindowPosition
   });
   movementController.applySettings(settings);
-  tray = createTray();
+  tray = createTray(app.getAppPath());
 
   const refreshMenus = async () => {
     if (!mainWindow || !tray) {
@@ -188,7 +188,7 @@ app.whenReady().then(async () => {
 
   app.on("activate", () => {
     if (mainWindow === null) {
-      mainWindow = createMainWindow();
+      mainWindow = createMainWindow({}, app.getAppPath());
       refreshMenus();
     }
   });

@@ -1,9 +1,11 @@
 import { Menu, Tray, app, nativeImage } from "electron";
 import { getMenuText } from "../shared/menu-i18n.mjs";
 import { buildDesktopPetMenuTemplate } from "./menu-template.mjs";
+import path from "node:path";
 
-export function createTray() {
-  const tray = new Tray(nativeImage.createEmpty());
+export function createTray(appRoot) {
+  const icon = appRoot ? nativeImage.createFromPath(path.join(appRoot, "build", "icon.ico")) : nativeImage.createEmpty();
+  const tray = new Tray(icon.isEmpty() ? nativeImage.createEmpty() : icon);
   tray.setToolTip("Desktop Pet");
   return tray;
 }
