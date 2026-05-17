@@ -124,6 +124,10 @@ window.desktopPet.onSetState((state) => {
   behavior.setManualState(state);
 });
 
+window.desktopPet.onMovementState((state) => {
+  behavior.setMovementState(state);
+});
+
 window.desktopPet.onScaleChanged((scale) => {
   applyScale(scale);
 });

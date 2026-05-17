@@ -61,6 +61,7 @@ export class PetBehavior {
     this.timing = mergeTiming(timings);
     this.pet = null;
     this.currentState = IDLE_STATE;
+    this.baseState = IDLE_STATE;
     this.mood = "calm";
     this.ambientTimerMs = this.randomAmbientDelay();
     this.clickCooldownMs = 0;
@@ -76,6 +77,7 @@ export class PetBehavior {
     this.pet = pet;
     this.mood = "calm";
     this.activeAction = null;
+    this.baseState = IDLE_STATE;
     this.manualOverride = false;
     this.clickCooldownMs = 0;
     this.clickComboTimerMs = 0;
@@ -90,6 +92,15 @@ export class PetBehavior {
     this.activeAction = null;
     this.manualOverride = true;
     this.setState(this.hasState(stateId) ? stateId : IDLE_STATE);
+  }
+
+  setMovementState(stateId) {
+    const nextBaseState = this.hasState(stateId) ? stateId : IDLE_STATE;
+    this.baseState = nextBaseState;
+
+    if (!this.manualOverride && !this.activeAction) {
+      this.setState(nextBaseState);
+    }
   }
 
   triggerInteraction() {
@@ -126,11 +137,17 @@ export class PetBehavior {
       }
 
       this.activeAction = null;
-      this.setState(IDLE_STATE);
+      this.setState(this.baseState);
       return;
     }
 
     this.updateMood();
+
+    if (this.baseState !== IDLE_STATE) {
+      this.setState(this.baseState);
+      return;
+    }
+
     this.ambientTimerMs -= deltaMs;
 
     if (this.ambientTimerMs <= 0) {
@@ -166,6 +183,10 @@ export class PetBehavior {
   }
 
   setState(stateId) {
+    if (this.currentState === stateId) {
+      return;
+    }
+
     this.currentState = stateId;
     this.onStateChange(stateId);
   }

@@ -1,11 +1,21 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { DEFAULT_LANGUAGE, normalizeLanguage } from "../shared/menu-i18n.mjs";
+import {
+  DEFAULT_CLICK_THROUGH,
+  DEFAULT_MOVEMENT_MODE,
+  normalizeClickThrough,
+  normalizeMovementMode
+} from "../shared/movement-options.mjs";
 import { DEFAULT_SCALE, normalizeScale } from "../shared/scale-options.mjs";
 
 const DEFAULT_SETTINGS = {
   selectedPetId: null,
   scale: DEFAULT_SCALE,
-  windowPosition: null
+  windowPosition: null,
+  movementMode: DEFAULT_MOVEMENT_MODE,
+  clickThrough: DEFAULT_CLICK_THROUGH,
+  language: DEFAULT_LANGUAGE
 };
 
 export async function readSettings(userDataPath) {
@@ -46,7 +56,10 @@ function normalizeSettings(settings) {
         ? settings.selectedPetId
         : null,
     scale: normalizeScale(scale),
-    windowPosition: position
+    windowPosition: position,
+    movementMode: normalizeMovementMode(settings?.movementMode),
+    clickThrough: normalizeClickThrough(settings?.clickThrough),
+    language: normalizeLanguage(settings?.language)
   };
 }
 

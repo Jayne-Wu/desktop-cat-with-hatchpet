@@ -76,6 +76,21 @@ test("long inactivity becomes sleepy and a click wakes the behavior", () => {
   assert.equal(behavior.getSnapshot().mood, "curious");
 });
 
+test("movement state resumes after a finite interaction action", () => {
+  const states = [];
+  const behavior = createBehavior(states);
+
+  behavior.attachPet(fakePet);
+  behavior.setMovementState("running-right");
+  behavior.triggerInteraction();
+
+  assert.equal(states.at(-1), "waving");
+
+  behavior.update(getStateCycleDurationMs("waving") * 2 + 1);
+
+  assert.equal(states.at(-1), "running-right");
+});
+
 function createBehavior(states, timings = {}) {
   return new PetBehavior({
     onStateChange: (state) => states.push(state),

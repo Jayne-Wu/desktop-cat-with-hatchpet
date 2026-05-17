@@ -1,7 +1,7 @@
 export const SCALE_OPTIONS = [
-  { label: "Small", value: 0.72 },
-  { label: "Medium", value: 0.92 },
-  { label: "Large", value: 1.12 }
+  { id: "small", value: 0.72 },
+  { id: "medium", value: 0.92 },
+  { id: "large", value: 1.12 }
 ];
 
 export const DEFAULT_SCALE = 0.92;

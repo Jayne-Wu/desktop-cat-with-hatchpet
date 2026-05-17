@@ -16,6 +16,11 @@ contextBridge.exposeInMainWorld("desktopPet", {
     ipcRenderer.on("pet:set-state", listener);
     return () => ipcRenderer.removeListener("pet:set-state", listener);
   },
+  onMovementState: (callback) => {
+    const listener = (_event, state) => callback(state);
+    ipcRenderer.on("pet:movement-state", listener);
+    return () => ipcRenderer.removeListener("pet:movement-state", listener);
+  },
   onScaleChanged: (callback) => {
     const listener = (_event, scale) => callback(scale);
     ipcRenderer.on("pet:scale-changed", listener);

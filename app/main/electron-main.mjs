@@ -2,16 +2,27 @@ import { app, ipcMain } from "electron";
 import { createMainWindow, moveWindowToAnchor } from "./window.mjs";
 import { buildTrayMenu, createTray } from "./tray.mjs";
 import { showPetContextMenu } from "./context-menu.mjs";
+import { MovementController } from "./movement-controller.mjs";
 import { getDefaultPet, getPetById, getPetSpritesheetDataUrl, getStartupPet, listLocalPets } from "./pet-registry.mjs";
 import { readSettings, writeSettings } from "./settings-store.mjs";
 
 let mainWindow = null;
 let tray = null;
 let windowDragState = null;
+let movementController = null;
+let positionPersistTimer = null;
 
 app.whenReady().then(async () => {
   const settings = await readSettings(app.getPath("userData"));
   mainWindow = createMainWindow(settings);
+  movementController = new MovementController({
+    mainWindow,
+    onStateChange: (state) => {
+      mainWindow?.webContents.send("pet:movement-state", state);
+    },
+    onPositionChanged: schedulePersistWindowPosition
+  });
+  movementController.applySettings(settings);
   tray = createTray();
 
   const refreshMenus = async () => {
@@ -26,10 +37,19 @@ app.whenReady().then(async () => {
         pets: state.registry.pets,
         selectedPetId: state.selectedPet?.id ?? null,
         scale: state.settings.scale,
+        movementMode: state.settings.movementMode,
+        clickThrough: state.settings.clickThrough,
+        language: state.settings.language,
         onSelectPet: selectPet,
         onSelectScale: applyScale,
+        onSelectMovementMode: applyMovementMode,
+        onToggleClickThrough: applyClickThrough,
         onResetPosition: resetWindowPosition,
-        onTogglePin: togglePin
+        onTogglePin: async () => {
+          togglePin();
+          await refreshMenus();
+        },
+        onSelectLanguage: applyLanguage
       })
     );
   };
@@ -75,9 +95,15 @@ app.whenReady().then(async () => {
         pets: state.registry.pets,
         selectedPetId: state.selectedPet?.id ?? null,
         scale: state.settings.scale,
+        movementMode: state.settings.movementMode,
+        clickThrough: state.settings.clickThrough,
+        language: state.settings.language,
         onSelectPet: selectPet,
         onSelectScale: applyScale,
+        onSelectMovementMode: applyMovementMode,
+        onToggleClickThrough: applyClickThrough,
         onResetPosition: resetWindowPosition,
+        onSelectLanguage: applyLanguage,
         onTogglePin: async () => {
           togglePin();
           await refreshMenus();
@@ -117,6 +143,7 @@ app.whenReady().then(async () => {
     }
 
     const [windowX, windowY] = mainWindow.getPosition();
+    movementController?.setDragging(true);
     windowDragState = {
       offsetX: pointer.screenX - windowX,
       offsetY: pointer.screenY - windowY
@@ -144,6 +171,7 @@ app.whenReady().then(async () => {
     }
 
     windowDragState = null;
+    movementController?.setDragging(false);
     await persistWindowPosition();
     return { ok: true };
   });
@@ -202,6 +230,23 @@ app.whenReady().then(async () => {
     await refreshMenus();
   }
 
+  async function applyMovementMode(movementMode) {
+    const nextSettings = await writeSettings(app.getPath("userData"), { movementMode });
+    movementController?.setMode(nextSettings.movementMode);
+    await refreshMenus();
+  }
+
+  async function applyClickThrough(clickThrough) {
+    const nextSettings = await writeSettings(app.getPath("userData"), { clickThrough });
+    movementController?.setClickThrough(nextSettings.clickThrough);
+    await refreshMenus();
+  }
+
+  async function applyLanguage(language) {
+    await writeSettings(app.getPath("userData"), { language });
+    await refreshMenus();
+  }
+
   async function resetWindowPosition(anchor) {
     if (!mainWindow) {
       return;
@@ -227,6 +272,24 @@ app.whenReady().then(async () => {
       windowPosition: { x, y }
     });
   }
+
+  function schedulePersistWindowPosition(options = {}) {
+    if (options.immediate) {
+      clearTimeout(positionPersistTimer);
+      positionPersistTimer = null;
+      persistWindowPosition();
+      return;
+    }
+
+    if (positionPersistTimer) {
+      return;
+    }
+
+    positionPersistTimer = setTimeout(() => {
+      positionPersistTimer = null;
+      persistWindowPosition();
+    }, 2000);
+  }
 });
 
 app.on("window-all-closed", () => {
@@ -236,6 +299,7 @@ app.on("window-all-closed", () => {
 });
 
 app.on("before-quit", () => {
+  movementController?.stop();
   tray?.destroy();
 });
 
