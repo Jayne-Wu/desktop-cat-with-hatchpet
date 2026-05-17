@@ -6,15 +6,12 @@ contextBridge.exposeInMainWorld("desktopPet", {
   listPets: () => ipcRenderer.invoke("pets:list"),
   getSpritesheetDataUrl: (petId) => ipcRenderer.invoke("pets:spritesheet-data-url", petId),
   showPetContextMenu: () => ipcRenderer.invoke("pet:show-context-menu"),
+  notifyInteraction: () => ipcRenderer.invoke("pet:interaction"),
+  reportAnimationState: (stateId) => ipcRenderer.invoke("pet:animation-state", stateId),
   onPetSelected: (callback) => {
     const listener = (_event, pet) => callback(pet);
     ipcRenderer.on("pet:selected", listener);
     return () => ipcRenderer.removeListener("pet:selected", listener);
-  },
-  onSetState: (callback) => {
-    const listener = (_event, state) => callback(state);
-    ipcRenderer.on("pet:set-state", listener);
-    return () => ipcRenderer.removeListener("pet:set-state", listener);
   },
   onMovementState: (callback) => {
     const listener = (_event, state) => callback(state);

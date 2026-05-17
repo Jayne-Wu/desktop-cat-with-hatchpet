@@ -1,18 +1,6 @@
 import { LANGUAGE_OPTIONS, getMenuText } from "../shared/menu-i18n.mjs";
-import { MOVEMENT_MODES } from "../shared/movement-options.mjs";
+import { COMPANION_STYLES } from "../shared/companion-options.mjs";
 import { SCALE_OPTIONS } from "../shared/scale-options.mjs";
-
-const ACTIONS = [
-  { labelKey: "idle", state: "idle" },
-  { labelKey: "waving", state: "waving" },
-  { labelKey: "jumping", state: "jumping" },
-  { labelKey: "waiting", state: "waiting" },
-  { labelKey: "running", state: "running" },
-  { labelKey: "review", state: "review" },
-  { labelKey: "failed", state: "failed" },
-  { labelKey: "runningLeft", state: "running-left" },
-  { labelKey: "runningRight", state: "running-right" }
-];
 
 const SCALE_LABEL_KEYS = {
   small: "small",
@@ -20,11 +8,11 @@ const SCALE_LABEL_KEYS = {
   large: "large"
 };
 
-const MOVEMENT_LABEL_KEYS = {
-  still: "still",
-  "bottom-walk": "bottomWalk",
-  "dock-left": "dockLeft",
-  "dock-right": "dockRight"
+const COMPANION_LABEL_KEYS = {
+  quiet: "quiet",
+  curious: "curious",
+  playful: "playful",
+  focus: "focus"
 };
 
 export function buildDesktopPetMenuTemplate({
@@ -32,13 +20,13 @@ export function buildDesktopPetMenuTemplate({
   pets,
   selectedPetId,
   scale,
-  movementMode,
+  companionStyle,
   clickThrough,
   language,
   visibilityLabel,
   onSelectPet,
   onSelectScale,
-  onSelectMovementMode,
+  onSelectCompanionStyle,
   onToggleClickThrough,
   onResetPosition,
   onTogglePin,
@@ -72,8 +60,8 @@ export function buildDesktopPetMenuTemplate({
       ]
     },
     {
-      label: text.behavior,
-      submenu: buildMovementItems({ text, movementMode, onSelectMovementMode })
+      label: text.companion,
+      submenu: buildCompanionItems({ text, companionStyle, onSelectCompanionStyle })
     },
     {
       label: text.interaction,
@@ -102,13 +90,6 @@ export function buildDesktopPetMenuTemplate({
           click: () => onResetPosition("bottom-right")
         }
       ]
-    },
-    {
-      label: text.actionTest,
-      submenu: ACTIONS.map((action) => ({
-        label: text[action.labelKey],
-        click: () => mainWindow.webContents.send("pet:set-state", action.state)
-      }))
     },
     {
       label: text.language,
@@ -160,11 +141,11 @@ function buildScaleItems({ text, scale, onSelectScale }) {
   }));
 }
 
-function buildMovementItems({ text, movementMode, onSelectMovementMode }) {
-  return MOVEMENT_MODES.map((option) => ({
-    label: text[MOVEMENT_LABEL_KEYS[option.id]],
+function buildCompanionItems({ text, companionStyle, onSelectCompanionStyle }) {
+  return COMPANION_STYLES.map((option) => ({
+    label: text[COMPANION_LABEL_KEYS[option.id]],
     type: "radio",
-    checked: option.id === movementMode,
-    click: () => onSelectMovementMode(option.id)
+    checked: option.id === companionStyle,
+    click: () => onSelectCompanionStyle(option.id)
   }));
 }

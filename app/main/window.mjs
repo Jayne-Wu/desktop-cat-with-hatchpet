@@ -7,7 +7,7 @@ const WINDOW_WIDTH = 280;
 const WINDOW_HEIGHT = 300;
 const WINDOW_MARGIN = 24;
 
-export function createMainWindow(settings = {}) {
+export function createMainWindow(settings = {}, appRoot) {
   const initialPosition = resolveInitialPosition(settings.windowPosition);
 
   const window = new BrowserWindow({
@@ -22,6 +22,7 @@ export function createMainWindow(settings = {}) {
     skipTaskbar: false,
     hasShadow: false,
     show: false,
+    icon: appRoot ? getIconPath(appRoot) : undefined,
     x: initialPosition?.x,
     y: initialPosition?.y,
     webPreferences: {
@@ -88,4 +89,8 @@ function getAnchorPosition(window, anchor) {
     x: Math.round(x + width - bounds.width - WINDOW_MARGIN),
     y: Math.round(y + height - bounds.height - WINDOW_MARGIN)
   };
+}
+
+function getIconPath(appRoot) {
+  return path.join(appRoot, "build", "icon.ico");
 }

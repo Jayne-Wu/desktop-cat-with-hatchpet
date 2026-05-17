@@ -2,18 +2,18 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { DEFAULT_LANGUAGE, normalizeLanguage } from "../shared/menu-i18n.mjs";
 import {
+  DEFAULT_COMPANION_STYLE,
   DEFAULT_CLICK_THROUGH,
-  DEFAULT_MOVEMENT_MODE,
+  normalizeCompanionStyle,
   normalizeClickThrough,
-  normalizeMovementMode
-} from "../shared/movement-options.mjs";
+} from "../shared/companion-options.mjs";
 import { DEFAULT_SCALE, normalizeScale } from "../shared/scale-options.mjs";
 
 const DEFAULT_SETTINGS = {
   selectedPetId: null,
   scale: DEFAULT_SCALE,
   windowPosition: null,
-  movementMode: DEFAULT_MOVEMENT_MODE,
+  companionStyle: DEFAULT_COMPANION_STYLE,
   clickThrough: DEFAULT_CLICK_THROUGH,
   language: DEFAULT_LANGUAGE
 };
@@ -57,7 +57,7 @@ function normalizeSettings(settings) {
         : null,
     scale: normalizeScale(scale),
     windowPosition: position,
-    movementMode: normalizeMovementMode(settings?.movementMode),
+    companionStyle: normalizeCompanionStyle(settings?.companionStyle),
     clickThrough: normalizeClickThrough(settings?.clickThrough),
     language: normalizeLanguage(settings?.language)
   };

@@ -9,7 +9,7 @@ Build a desktop pet application that treats Codex/Hatchpet pet assets as a first
 - Reuse existing assets without re-authoring.
 - Keep asset parsing separate from runtime behavior.
 - Keep desktop shell concerns separate from pet animation logic.
-- Start with a stable pet player, then add richer behavior and movement.
+- Start with a stable pet player, then evolve it into an automatic companion.
 
 ## System Layers
 
@@ -44,7 +44,7 @@ This layer is where future support for other pet formats can be added without re
 
 ### 3. Runtime Layer
 
-Owns playback, state changes, and user-facing pet behavior.
+Owns playback, state changes, and pet-like companion behavior.
 
 Responsibilities:
 
@@ -52,7 +52,7 @@ Responsibilities:
 - state transitions
 - timing
 - interaction responses
-- future movement, bounds, and behavior policies
+- companion-style pacing and movement policies
 
 ### 4. Desktop App Layer
 
@@ -90,7 +90,7 @@ app/
 2. The renderer requests the pet list over the preload bridge.
 3. The renderer loads one pet manifest and image.
 4. The adapter applies the Codex atlas contract.
-5. The runtime plays frames and changes states.
+5. The runtime maps companion intent into animation states.
 6. The renderer draws the active frame onto a transparent canvas.
 
 ## Runtime Boundaries
@@ -106,7 +106,7 @@ app/
 
 - image loading
 - animation playback
-- behavior timing
+- companion-state mapping
 - drawing
 - local user interactions
 
@@ -114,15 +114,15 @@ app/
 
 ### Near-Term
 
-- richer state transitions
+- companion styles in the runtime and menu
 - pet scaling
 - drag support
 - pet switching from tray and renderer
 
 ### Mid-Term
 
-- screen-edge walking
-- simple rule-based behavior engine
+- edge-biased strolling with settle/observe/rehome phases
+- richer automatic companion behavior
 - click-through mode
 - settings persistence
 

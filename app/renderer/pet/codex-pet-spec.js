@@ -4,17 +4,23 @@ export const ATLAS_COLUMNS = 8;
 export const ATLAS_ROWS = 9;
 export const ATLAS_WIDTH = CELL_WIDTH * ATLAS_COLUMNS;
 export const ATLAS_HEIGHT = CELL_HEIGHT * ATLAS_ROWS;
+export const COMPANION_IDLE_DURATIONS_MS = [3600, 480, 900, 420, 1320, 4200];
+export const DIRECTIONAL_LOCOMOTION_DURATIONS_MS = [120, 120, 120, 120, 120, 120, 120, 220];
+export const FEEDBACK_WAVING_DURATIONS_MS = [240, 220, 280, 980];
+export const FEEDBACK_JUMPING_DURATIONS_MS = [220, 180, 220, 180, 880];
+export const FEEDBACK_FAILED_DURATIONS_MS = [320, 240, 340, 260, 360, 280, 420, 1280];
+export const FEEDBACK_RUNNING_DURATIONS_MS = [220, 180, 220, 180, 260, 820];
 
 export const ATLAS_STATES = [
-  { id: "idle", row: 0, durationsMs: [280, 110, 110, 140, 140, 320] },
-  { id: "running-right", row: 1, durationsMs: [120, 120, 120, 120, 120, 120, 120, 220] },
-  { id: "running-left", row: 2, durationsMs: [120, 120, 120, 120, 120, 120, 120, 220] },
-  { id: "waving", row: 3, durationsMs: [140, 140, 140, 280] },
-  { id: "jumping", row: 4, durationsMs: [140, 140, 140, 140, 280] },
-  { id: "failed", row: 5, durationsMs: [140, 140, 140, 140, 140, 140, 140, 240] },
-  { id: "waiting", row: 6, durationsMs: [150, 150, 150, 150, 150, 260] },
-  { id: "running", row: 7, durationsMs: [120, 120, 120, 120, 120, 220] },
-  { id: "review", row: 8, durationsMs: [150, 150, 150, 150, 150, 280] }
+  { id: "idle", row: 0, durationsMs: [...COMPANION_IDLE_DURATIONS_MS] },
+  { id: "running-right", row: 1, durationsMs: [...DIRECTIONAL_LOCOMOTION_DURATIONS_MS] },
+  { id: "running-left", row: 2, durationsMs: [...DIRECTIONAL_LOCOMOTION_DURATIONS_MS] },
+  { id: "waving", row: 3, durationsMs: [...FEEDBACK_WAVING_DURATIONS_MS] },
+  { id: "jumping", row: 4, durationsMs: [...FEEDBACK_JUMPING_DURATIONS_MS] },
+  { id: "failed", row: 5, durationsMs: [...FEEDBACK_FAILED_DURATIONS_MS] },
+  { id: "waiting", row: 6, durationsMs: [...COMPANION_IDLE_DURATIONS_MS] },
+  { id: "running", row: 7, durationsMs: [...FEEDBACK_RUNNING_DURATIONS_MS] },
+  { id: "review", row: 8, durationsMs: [...COMPANION_IDLE_DURATIONS_MS] }
 ];
 
 export function getStateSpec(stateId) {

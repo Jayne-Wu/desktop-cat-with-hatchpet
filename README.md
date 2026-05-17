@@ -11,7 +11,7 @@ Desktop Cat With Hatchpet 是一个 Windows-first 的 Electron 桌面宠物运�
 - Electron 桌面壳：负责窗口、托盘、右键菜单、置顶、隐藏和退出。
 - Hatchpet 资源适配层：扫描 `pets/`，读取 `pet.json`，解析 `spritesheet.webp`。
 - Canvas 动画运行时：按 Codex/Hatchpet atlas 规格裁切帧并播放动画。
-- 轻量行为系统：处理点击互动、手动动作切换和随机 ambient 状态。
+- 轻量陪伴系统：处理点击互动、自动巡游、停留观察和回窝节奏。
 
 项目当前面向 Windows 开发和打包，后续可以在不改变宠物资源格式的前提下扩展宠物切换、桌面移动、工作陪伴和多宠物能力。
 
@@ -24,15 +24,15 @@ Desktop Cat With Hatchpet 是一个 Windows-first 的 Electron 桌面宠物运�
 - 透明、无边框、始终置顶的 Electron 桌宠窗口。
 - 默认加载 `pets/xigua/pet.json` 和 `pets/xigua/spritesheet.webp`。
 - 支持 9 个 Codex/Hatchpet 动画状态：`idle`、`running-right`、`running-left`、`waving`、`jumping`、`failed`、`waiting`、`running`、`review`。
-- 左键点击触发有限时长的互动动作，并会根据点击节奏在 `waving`、`jumping`、`review` 之间变化。
-- 右键菜单支持手动动作切换：`Idle`、`Wave`、`Jump`、`Waiting`、`Working`、`Review`、`Failed`、`Move Left`、`Move Right`。
+- 左键点击触发有限时长的玩耍反馈，并在 `waving`、`jumping`、`review` 之间变化。
+- 右键菜单支持切换陪伴风格：`Quiet`、`Curious`、`Playful`、`Focus`。
 - 右键菜单支持窗口控制：`Pin / Unpin`、`Hide`、`Quit`。
 - 系统托盘支持显示、隐藏、置顶切换和退出。
 - 本地设置存储支持宠物选择、缩放和窗口位置等运行时设置。
 - 支持从右键菜单和托盘切换 `xigua` 与 `simba`。
 - 支持拖拽摆放、三档尺寸切换和一键重置位置。
-- 支持更安静的随机 ambient 动作、简单情绪节奏和长时间无操作后的休息/唤醒行为。
-- 支持底部走动、左右停靠和点击穿透模式。
+- 支持自动贴边巡游、停留观察、拖拽后延迟回窝和长时间无操作后的休息/唤醒行为。
+- 支持点击穿透模式，以及更低打扰的陪伴风格切换。
 - 支持中文 / English 菜单切换。
 - `npm run validate:pets` 可以校验本地宠物 manifest 和 WebP atlas 尺寸。
 
@@ -101,7 +101,7 @@ desktop-cat-with-hatchpet/
 
 - `electron-main.mjs`：应用入口，注册 IPC、创建窗口、创建托盘、转发 renderer 日志。
 - `window.mjs`：创建透明、无边框、始终置顶的桌宠窗口。
-- `context-menu.mjs`：提供动作切换、置顶切换、隐藏和退出。
+- `context-menu.mjs`：提供陪伴风格、置顶切换、隐藏和退出。
 - `tray.mjs`：提供系统托盘菜单。
 - `pet-registry.mjs`：扫描 `pets/`，校验 `pet.json`，读取默认宠物并返回 spritesheet 数据。
 - `settings-store.mjs`：读写本地运行设置。
@@ -117,12 +117,13 @@ desktop-cat-with-hatchpet/
 - `codex-pet-spec.js`：定义 Codex/Hatchpet atlas 固定规格。
 - `pet-loader.js`：加载 manifest 和 spritesheet，校验 atlas 尺寸。
 - `atlas-player.js`：根据当前状态和帧时长推进动画。
-- `pet-behavior.js`：处理点击互动和随机 ambient 状态。
+- `pet-behavior.js`：将点击注意力、陪伴风格和移动意图映射到动画状态。
 - `pet-renderer.js`：从 spritesheet 裁切当前帧并绘制到 canvas。
 
 ### Supporting Files
 
 - `docs/architecture.md`：分层架构和数据流。
+- `docs/behavior-logic.md`：当前桌宠行为、动作触发方式和状态映射说明。
 - `docs/pet-format.md`：Hatchpet/Codex 资源格式说明。
 - `docs/runtime-states.md`：9 个动画状态在桌宠中的语义。
 - `pets/README.md`：本地宠物资源目录说明。
