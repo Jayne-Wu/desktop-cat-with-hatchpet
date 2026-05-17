@@ -17,7 +17,7 @@ Desktop Cat With Hatchpet 是一个 Windows-first 的 Electron 桌面宠物运�
 
 ## Current Version
 
-`v1.3.0: 桌面移动版`
+`v1.4.0: 工作陪伴版`
 
 当前版本的范围是稳定播放本地 Hatchpet/Codex 宠物资源，并提供基础桌面控制能力。已支持：
 
@@ -188,7 +188,7 @@ pets/xigua/spritesheet.webp
 
 触发方式：
 
-- 推送 `v*` 格式标签，例如 `v1.3.0`。
+- 推送 `v*` 格式标签，例如 `v1.4.0`。
 - 在 GitHub Actions 页面手动运行 `workflow_dispatch`。
 
 workflow 会在 GitHub 的 Windows runner 上执行：
@@ -203,8 +203,8 @@ workflow 会在 GitHub 的 Windows runner 上执行：
 发布标签示例：
 
 ```bash
-git tag v1.3.0
-git push origin v1.3.0
+git tag v1.4.0
+git push origin v1.4.0
 ```
 
 ### Private Pet Assets
@@ -225,7 +225,7 @@ pets/xigua/spritesheet.webp
 
 ## Roadmap
 
-当前版本作为 `v1.3.0` 固化，后续版本按“先好用，再像桌宠，再成为轻陪伴应用”的路线演进。
+当前版本作为 `v1.4.0` 固化，后续版本按“先好用，再像桌宠，再成为轻陪伴应用”的路线演进。
 
 ### v1.1.0 基础可用性版
 
