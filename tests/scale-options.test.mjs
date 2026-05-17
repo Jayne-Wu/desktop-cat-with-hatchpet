@@ -8,7 +8,7 @@ test("scale defaults to medium", () => {
 });
 
 test("saved legacy scale values snap to the nearest supported size", () => {
-  assert.equal(normalizeScale(0.74), 0.72);
+  assert.equal(normalizeScale(0.62), 0.6);
   assert.equal(normalizeScale(1), 0.92);
   assert.equal(normalizeScale(1.25), 1.12);
 });

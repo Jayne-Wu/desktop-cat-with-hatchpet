@@ -37,12 +37,12 @@ app.whenReady().then(async () => {
         pets: state.registry.pets,
         selectedPetId: state.selectedPet?.id ?? null,
         scale: state.settings.scale,
-        movementMode: state.settings.movementMode,
+        companionStyle: state.settings.companionStyle,
         clickThrough: state.settings.clickThrough,
         language: state.settings.language,
         onSelectPet: selectPet,
         onSelectScale: applyScale,
-        onSelectMovementMode: applyMovementMode,
+        onSelectCompanionStyle: applyCompanionStyle,
         onToggleClickThrough: applyClickThrough,
         onResetPosition: resetWindowPosition,
         onTogglePin: async () => {
@@ -95,12 +95,12 @@ app.whenReady().then(async () => {
         pets: state.registry.pets,
         selectedPetId: state.selectedPet?.id ?? null,
         scale: state.settings.scale,
-        movementMode: state.settings.movementMode,
+        companionStyle: state.settings.companionStyle,
         clickThrough: state.settings.clickThrough,
         language: state.settings.language,
         onSelectPet: selectPet,
         onSelectScale: applyScale,
-        onSelectMovementMode: applyMovementMode,
+        onSelectCompanionStyle: applyCompanionStyle,
         onToggleClickThrough: applyClickThrough,
         onResetPosition: resetWindowPosition,
         onSelectLanguage: applyLanguage,
@@ -120,6 +120,16 @@ app.whenReady().then(async () => {
 
   ipcMain.handle("settings:write", async (_event, settings) => {
     return writeSettings(app.getPath("userData"), settings);
+  });
+
+  ipcMain.handle("pet:interaction", async () => {
+    movementController?.noteInteraction();
+    return { ok: true };
+  });
+
+  ipcMain.handle("pet:animation-state", async (_event, stateId) => {
+    movementController?.setAnimationState(stateId);
+    return { ok: true };
   });
 
   ipcMain.handle("window:toggle-pin", async () => {
@@ -230,9 +240,9 @@ app.whenReady().then(async () => {
     await refreshMenus();
   }
 
-  async function applyMovementMode(movementMode) {
-    const nextSettings = await writeSettings(app.getPath("userData"), { movementMode });
-    movementController?.setMode(nextSettings.movementMode);
+  async function applyCompanionStyle(companionStyle) {
+    const nextSettings = await writeSettings(app.getPath("userData"), { companionStyle });
+    movementController?.setCompanionStyle(nextSettings.companionStyle);
     await refreshMenus();
   }
 

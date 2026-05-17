@@ -1,5 +1,5 @@
 export const SCALE_OPTIONS = [
-  { id: "small", value: 0.72 },
+  { id: "small", value: 0.6 },
   { id: "medium", value: 0.92 },
   { id: "large", value: 1.12 }
 ];

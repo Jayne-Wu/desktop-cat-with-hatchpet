@@ -13,6 +13,7 @@ const player = new AtlasPlayer();
 const behavior = new PetBehavior({
   onStateChange: (state) => {
     player.setState(state);
+    void window.desktopPet.reportAnimationState(state);
   }
 });
 
@@ -47,6 +48,9 @@ async function loadStartupState() {
   const startupPet = await window.desktopPet.getStartupPet();
 
   applyScale(settings.scale);
+  behavior.setMovementState({
+    companionStyle: settings.companionStyle
+  });
   await activatePet(startupPet);
 }
 
@@ -60,6 +64,7 @@ canvas.addEventListener("click", () => {
     return;
   }
 
+  void window.desktopPet.notifyInteraction();
   behavior.triggerInteraction();
 });
 
@@ -118,10 +123,6 @@ window.addEventListener("contextmenu", (event) => {
 
 window.desktopPet.onPetSelected((petRecord) => {
   void activatePet(petRecord);
-});
-
-window.desktopPet.onSetState((state) => {
-  behavior.setManualState(state);
 });
 
 window.desktopPet.onMovementState((state) => {

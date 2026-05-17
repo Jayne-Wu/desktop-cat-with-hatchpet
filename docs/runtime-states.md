@@ -42,12 +42,12 @@ Focused thinking or inspection loop. Useful for a quiet active state that is dis
 
 ## Initial Runtime Policy
 
-The first runtime version should interpret states like this:
+The current companion runtime should interpret states like this:
 
 - default: `idle`
-- click reaction: `waving` or `jumping`
-- random ambient actions: `review`, `running`, `waiting`
-- manual test controls: allow switching through all nine states
+- click reaction: short playful bursts using `waving`, `jumping`, or `review`
+- quiet observation: `review`, `waiting`, or `idle`
+- active edge movement: `running-right`, `running-left`, and occasional `running`
 
 ## Future Runtime Policy
 

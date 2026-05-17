@@ -1,18 +1,22 @@
+import {
+  COMPANION_STYLE_PROFILES,
+  DEFAULT_COMPANION_STYLE,
+  normalizeCompanionStyle
+} from "../../shared/companion-options.mjs";
 import { getStateCycleDurationMs } from "./codex-pet-spec.js";
 
 const IDLE_STATE = "idle";
-const INTERACTION_SEQUENCE = ["waving", "jumping", "review"];
+const STILL_STATE = "still";
+const DEFAULT_MOVEMENT_STATE = {
+  companionStyle: DEFAULT_COMPANION_STYLE,
+  phase: "observe",
+  locomotion: "none",
+  edge: "bottom"
+};
+
 const DEFAULT_TIMING = {
-  clickCooldownMs: 360,
-  clickComboWindowMs: 2400,
   calmAfterMs: 45000,
-  sleepAfterMs: 120000,
-  ambientDelayMsByMood: {
-    calm: [11000, 19000],
-    curious: [9000, 15000],
-    playful: [7000, 12000],
-    sleepy: [24000, 38000]
-  }
+  sleepAfterMs: 120000
 };
 
 const INTERACTION_LOOPS = {
@@ -21,85 +25,49 @@ const INTERACTION_LOOPS = {
   review: 2
 };
 
-const AMBIENT_LOOPS = {
-  waving: 1,
-  waiting: 2,
-  review: 2,
-  running: 2
-};
-
-const AMBIENT_WEIGHTS_BY_MOOD = {
-  calm: [
-    ["waiting", 35],
-    ["review", 35],
-    ["waving", 20],
-    ["running", 10]
-  ],
-  curious: [
-    ["review", 45],
-    ["waiting", 25],
-    ["waving", 20],
-    ["running", 10]
-  ],
-  playful: [
-    ["waving", 45],
-    ["running", 20],
-    ["review", 20],
-    ["waiting", 15]
-  ],
-  sleepy: [
-    ["waiting", 50],
-    ["review", 35],
-    ["waving", 15]
-  ]
-};
-
 export class PetBehavior {
   constructor({ onStateChange, random = Math.random, timings = {} }) {
     this.onStateChange = onStateChange;
     this.random = random;
-    this.timing = mergeTiming(timings);
+    this.timing = {
+      ...DEFAULT_TIMING,
+      ...timings
+    };
     this.pet = null;
     this.currentState = IDLE_STATE;
-    this.baseState = IDLE_STATE;
+    this.movementState = { ...DEFAULT_MOVEMENT_STATE };
+    this.profile = COMPANION_STYLE_PROFILES[DEFAULT_COMPANION_STYLE];
     this.mood = "calm";
-    this.ambientTimerMs = this.randomAmbientDelay();
     this.clickCooldownMs = 0;
-    this.clickComboTimerMs = 0;
-    this.clickComboCount = 0;
+    this.playfulBurstMs = 0;
     this.timeSinceInteractionMs = 0;
     this.activeAction = null;
-    this.lastAmbientState = null;
-    this.manualOverride = false;
   }
 
   attachPet(pet) {
     this.pet = pet;
+    this.currentState = IDLE_STATE;
     this.mood = "calm";
-    this.activeAction = null;
-    this.baseState = IDLE_STATE;
-    this.manualOverride = false;
     this.clickCooldownMs = 0;
-    this.clickComboTimerMs = 0;
-    this.clickComboCount = 0;
+    this.playfulBurstMs = 0;
     this.timeSinceInteractionMs = 0;
-    this.lastAmbientState = null;
-    this.ambientTimerMs = this.randomAmbientDelay();
-    this.setState(IDLE_STATE);
-  }
-
-  setManualState(stateId) {
     this.activeAction = null;
-    this.manualOverride = true;
-    this.setState(this.hasState(stateId) ? stateId : IDLE_STATE);
+    this.setState(this.resolveAutomaticState());
   }
 
-  setMovementState(stateId) {
-    const nextBaseState = this.hasState(stateId) ? stateId : IDLE_STATE;
-    this.baseState = nextBaseState;
+  setMovementState(state = {}) {
+    const companionStyle = normalizeCompanionStyle(state?.companionStyle);
 
-    if (!this.manualOverride && !this.activeAction) {
-      this.setState(nextBaseState);
+    this.movementState = {
+      companionStyle,
+      phase: state?.phase ?? DEFAULT_MOVEMENT_STATE.phase,
+      locomotion: state?.locomotion ?? DEFAULT_MOVEMENT_STATE.locomotion,
+      edge: state?.edge ?? DEFAULT_MOVEMENT_STATE.edge
+    };
+    this.profile = COMPANION_STYLE_PROFILES[companionStyle];
+
+    if (!this.activeAction) {
+      this.setState(this.resolveAutomaticState());
     }
   }
 
@@ -108,15 +76,11 @@ export class PetBehavior {
       return;
     }
 
-    this.manualOverride = false;
     this.timeSinceInteractionMs = 0;
-    this.mood = this.clickComboTimerMs > 0 ? "playful" : "curious";
-    this.clickComboCount = this.clickComboTimerMs > 0 ? this.clickComboCount + 1 : 1;
-    this.clickComboTimerMs = this.timing.clickComboWindowMs;
-    this.clickCooldownMs = this.timing.clickCooldownMs;
-
-    const stateId = INTERACTION_SEQUENCE[Math.min(this.clickComboCount - 1, INTERACTION_SEQUENCE.length - 1)];
-    this.startTimedAction(stateId, "interaction");
+    this.playfulBurstMs = Math.max(this.playfulBurstMs, this.profile.interactionBurstMs);
+    this.clickCooldownMs = this.profile.interactionCooldownMs;
+    this.mood = "playful";
+    this.startTimedAction(this.selectInteractionState());
   }
 
   update(deltaMs) {
@@ -125,10 +89,7 @@ export class PetBehavior {
     }
 
     this.tickSharedTimers(deltaMs);
-
-    if (this.manualOverride) {
-      return;
-    }
+    this.updateMood();
 
     if (this.activeAction) {
       this.activeAction.remainingMs -= deltaMs;
@@ -137,49 +98,139 @@ export class PetBehavior {
       }
 
       this.activeAction = null;
-      this.setState(this.baseState);
-      return;
     }
 
-    this.updateMood();
-
-    if (this.baseState !== IDLE_STATE) {
-      this.setState(this.baseState);
-      return;
-    }
-
-    this.ambientTimerMs -= deltaMs;
-
-    if (this.ambientTimerMs <= 0) {
-      const stateId = this.selectAmbientState();
-      this.lastAmbientState = stateId;
-      this.ambientTimerMs = this.randomAmbientDelay();
-      this.startTimedAction(stateId, "ambient");
-    }
+    this.setState(this.resolveAutomaticState());
   }
 
   getSnapshot() {
     return {
       state: this.currentState,
       mood: this.mood,
-      manualOverride: this.manualOverride,
+      companionStyle: this.movementState.companionStyle,
+      movementState: { ...this.movementState },
       activeAction: this.activeAction ? { ...this.activeAction } : null,
-      ambientTimerMs: this.ambientTimerMs
+      playfulBurstMs: this.playfulBurstMs
     };
   }
 
-  startTimedAction(stateId, source) {
+  startTimedAction(stateId) {
     if (!this.hasState(stateId)) {
-      this.setState(IDLE_STATE);
+      this.setState(this.resolveAutomaticState());
       return;
     }
 
     this.activeAction = {
-      source,
       stateId,
-      remainingMs: this.actionDurationMs(stateId, source)
+      remainingMs: getStateCycleDurationMs(stateId) * (INTERACTION_LOOPS[stateId] ?? 1)
     };
     this.setState(stateId);
+  }
+
+  resolveAutomaticState() {
+    if (this.activeAction) {
+      return this.activeAction.stateId;
+    }
+
+    if (this.movementState.locomotion === "left") {
+      return this.hasState("running-left") ? "running-left" : IDLE_STATE;
+    }
+
+    if (this.movementState.locomotion === "right") {
+      return this.hasState("running-right") ? "running-right" : IDLE_STATE;
+    }
+
+    if (this.movementState.locomotion === "vertical") {
+      return this.hasState("running") ? "running" : IDLE_STATE;
+    }
+
+    if (this.movementState.phase === "settle") {
+      return this.resolveSettleState();
+    }
+
+    if (this.movementState.phase === "rehome") {
+      return this.hasState("running") ? "running" : IDLE_STATE;
+    }
+
+    if (this.movementState.phase === "observe") {
+      return this.resolveObserveState();
+    }
+
+    return this.resolveObserveState();
+  }
+
+  resolveObserveState() {
+    if (this.mood === "sleepy") {
+      return this.hasState("waiting") ? "waiting" : IDLE_STATE;
+    }
+
+    if (this.playfulBurstMs > 0 && this.hasState("review")) {
+      return "review";
+    }
+
+    if (this.movementState.companionStyle === "focus") {
+      return STILL_STATE;
+    }
+
+    if (this.movementState.companionStyle === "quiet") {
+      return this.hasState("idle") ? "idle" : IDLE_STATE;
+    }
+
+    if (this.movementState.companionStyle === "playful" && this.hasState("running")) {
+      return "running";
+    }
+
+    if (this.hasState("review")) {
+      return "review";
+    }
+
+    return IDLE_STATE;
+  }
+
+  resolveSettleState() {
+    if (this.mood === "sleepy" && this.hasState("waiting")) {
+      return "waiting";
+    }
+
+    if (this.movementState.companionStyle === "focus") {
+      return STILL_STATE;
+    }
+
+    if (this.movementState.companionStyle === "quiet" && this.hasState("waiting")) {
+      return "waiting";
+    }
+
+    return this.hasState("idle") ? "idle" : IDLE_STATE;
+  }
+
+  selectInteractionState() {
+    const style = this.movementState.companionStyle;
+    const weightedStates =
+      style === "quiet"
+        ? [
+            ["waving", 50],
+            ["review", 35],
+            ["jumping", 15]
+          ]
+        : style === "focus"
+          ? [
+              ["review", 50],
+              ["waving", 35],
+              ["jumping", 15]
+            ]
+          : style === "playful"
+            ? [
+                ["jumping", 45],
+                ["waving", 35],
+                ["review", 20]
+              ]
+            : [
+                ["waving", 40],
+                ["jumping", 25],
+                ["review", 35]
+              ];
+
+    return pickWeighted(weightedStates, this.random);
   }
 
   setState(stateId) {
@@ -194,11 +245,7 @@ export class PetBehavior {
   tickSharedTimers(deltaMs) {
     this.timeSinceInteractionMs += deltaMs;
     this.clickCooldownMs = Math.max(0, this.clickCooldownMs - deltaMs);
-    this.clickComboTimerMs = Math.max(0, this.clickComboTimerMs - deltaMs);
-
-    if (this.clickComboTimerMs === 0) {
-      this.clickComboCount = 0;
-    }
+    this.playfulBurstMs = Math.max(0, this.playfulBurstMs - deltaMs);
   }
 
   updateMood() {
@@ -207,48 +254,24 @@ export class PetBehavior {
       return;
     }
 
-    if (this.timeSinceInteractionMs >= this.timing.calmAfterMs && this.mood !== "calm") {
+    if (this.playfulBurstMs > 0) {
+      this.mood = "playful";
+      return;
+    }
+
+    if (this.timeSinceInteractionMs < 12000) {
+      this.mood = "curious";
+      return;
+    }
+
+    if (this.timeSinceInteractionMs >= this.timing.calmAfterMs) {
       this.mood = "calm";
     }
-  }
-
-  selectAmbientState() {
-    const weightedStates = AMBIENT_WEIGHTS_BY_MOOD[this.mood] ?? AMBIENT_WEIGHTS_BY_MOOD.calm;
-    const pickedState = pickWeighted(weightedStates, this.random);
-
-    if (pickedState !== this.lastAmbientState || weightedStates.length < 2) {
-      return pickedState;
-    }
-
-    const fallback = weightedStates.find(([stateId]) => stateId !== pickedState);
-    return fallback?.[0] ?? pickedState;
-  }
-
-  actionDurationMs(stateId, source) {
-    const loops = source === "interaction" ? INTERACTION_LOOPS[stateId] : AMBIENT_LOOPS[stateId];
-    return getStateCycleDurationMs(stateId) * (loops ?? 1);
-  }
-
-  randomAmbientDelay() {
-    const [min, max] =
-      this.timing.ambientDelayMsByMood[this.mood] ?? this.timing.ambientDelayMsByMood.calm;
-    return min + this.random() * (max - min);
   }
 
   hasState(stateId) {
     return Boolean(this.pet?.states?.[stateId]);
   }
-}
-
-function mergeTiming(timings) {
-  return {
-    ...DEFAULT_TIMING,
-    ...timings,
-    ambientDelayMsByMood: {
-      ...DEFAULT_TIMING.ambientDelayMsByMood,
-      ...timings.ambientDelayMsByMood
-    }
-  };
 }
 
 function pickWeighted(weightedStates, random) {
