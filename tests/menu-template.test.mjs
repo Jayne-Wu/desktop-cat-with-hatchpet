@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildDesktopPetMenuTemplate } from "../app/main/menu-template.mjs";
 
-test("pin toggle is a top-level menu item and click through is removed", () => {
+test("pin toggle lives with visibility controls and click through is removed", () => {
   const menu = buildDesktopPetMenuTemplate({
     mainWindow: fakeWindow(),
     pets: [],
@@ -22,10 +22,13 @@ test("pin toggle is a top-level menu item and click through is removed", () => {
   const companion = menu.find((item) => item.label === "Companion Style");
   const interaction = menu.find((item) => item.label === "Interaction");
   const unpin = menu.find((item) => item.label === "Unpin");
+  const unpinIndex = menu.indexOf(unpin);
+  const hideIndex = menu.findIndex((item) => item.label === "Hide");
   const actionTest = menu.find((item) => item.label === "Action Test");
 
   assert.ok(companion);
   assert.ok(unpin);
+  assert.equal(unpinIndex, hideIndex - 1);
   assert.equal(interaction, undefined);
   assert.equal(actionTest, undefined);
 });

@@ -44,10 +44,6 @@ export function buildDesktopPetMenuTemplate({
       submenu: buildCompanionItems({ text, companionStyle, onSelectCompanionStyle })
     },
     {
-      label: pinned ? text.unpin : text.pin,
-      click: onTogglePin
-    },
-    {
       label: text.position,
       submenu: [
         {
@@ -71,6 +67,10 @@ export function buildDesktopPetMenuTemplate({
     },
     {
       type: "separator"
+    },
+    {
+      label: pinned ? text.unpin : text.pin,
+      click: onTogglePin
     },
     {
       label: visibilityLabel,
