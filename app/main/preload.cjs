@@ -25,7 +25,6 @@ contextBridge.exposeInMainWorld("desktopPet", {
   },
   readSettings: () => ipcRenderer.invoke("settings:read"),
   writeSettings: (settings) => ipcRenderer.invoke("settings:write", settings),
-  togglePin: () => ipcRenderer.invoke("window:toggle-pin"),
   minimize: () => ipcRenderer.invoke("window:minimize"),
   beginWindowDrag: (pointer) => ipcRenderer.invoke("window:drag-start", pointer),
   updateWindowDrag: (pointer) => ipcRenderer.invoke("window:drag-update", pointer),

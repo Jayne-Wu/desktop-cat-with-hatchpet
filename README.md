@@ -15,7 +15,7 @@ Windows 打包产物名：`DesktopCat-v${version}.exe`
 - 支持 Codex/Hatchpet 固定 8x9 atlas：`idle`、`running-right`、`running-left`、`waving`、`jumping`、`failed`、`waiting`、`running`、`review`。
 - 支持右键菜单和系统托盘菜单。
 - 支持中文 / English 菜单切换，默认中文。
-- 支持宠物切换、右下角自由拖拽缩放、拖拽摆放、位置重置、置顶切换、显示隐藏和退出。
+- 支持宠物切换、右下角自由拖拽缩放、拖拽摆放、位置重置、显示隐藏和退出。
 - 支持点击穿透，开启后窗口不拦截鼠标，方便把宠物放在工作区上方。
 - 支持四种陪伴风格：安静陪伴、好奇巡视、活泼玩耍、低打扰专注。
 - 支持底部边缘自动移动、停留观察、拖拽后回到底部边缘。
@@ -157,7 +157,7 @@ spritesheet 约束：
 - 当前宠物：只读显示当前选择。
 - 宠物：切换 `xigua` / `simba`。
 - 陪伴风格：切换 `quiet` / `curious` / `playful` / `focus`。
-- 交互：点击穿透、置顶 / 取消置顶。
+- 交互：点击穿透。
 - 位置：回到屏幕中央、回到右下角。
 - 语言：中文 / English。
 - 显示或隐藏、退出。

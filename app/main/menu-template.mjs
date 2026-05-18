@@ -9,7 +9,6 @@ const COMPANION_LABEL_KEYS = {
 };
 
 export function buildDesktopPetMenuTemplate({
-  mainWindow,
   pets,
   selectedPetId,
   companionStyle,
@@ -20,14 +19,12 @@ export function buildDesktopPetMenuTemplate({
   onSelectCompanionStyle,
   onToggleClickThrough,
   onResetPosition,
-  onTogglePin,
   onSelectLanguage,
   onVisibilityToggle,
   onQuit
 }) {
   const text = getMenuText(language);
   const currentPet = pets.find((pet) => pet.id === selectedPetId) ?? pets[0] ?? null;
-  const pinned = mainWindow.isAlwaysOnTop();
 
   return [
     {
@@ -53,10 +50,6 @@ export function buildDesktopPetMenuTemplate({
           type: "checkbox",
           checked: clickThrough,
           click: () => onToggleClickThrough(!clickThrough)
-        },
-        {
-          label: pinned ? text.unpin : text.pin,
-          click: onTogglePin
         }
       ]
     },

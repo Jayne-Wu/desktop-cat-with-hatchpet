@@ -4,20 +4,16 @@ import { buildDesktopPetMenuTemplate } from "../app/main/menu-template.mjs";
 
 test("click through lives under interaction and action test is removed", () => {
   const menu = buildDesktopPetMenuTemplate({
-    mainWindow: fakeWindow(),
     pets: [],
     selectedPetId: null,
-    scale: 0.92,
     companionStyle: "curious",
     clickThrough: false,
     language: "en-US",
     visibilityLabel: "Hide",
     onSelectPet: noop,
-    onSelectScale: noop,
     onSelectCompanionStyle: noop,
     onToggleClickThrough: noop,
     onResetPosition: noop,
-    onTogglePin: noop,
     onSelectLanguage: noop,
     onVisibilityToggle: noop,
     onQuit: noop
@@ -33,11 +29,5 @@ test("click through lives under interaction and action test is removed", () => {
   assert.equal(interaction.submenu.some((item) => item.label === "Click Through"), true);
   assert.equal(actionTest, undefined);
 });
-
-function fakeWindow() {
-  return {
-    isAlwaysOnTop: () => true
-  };
-}
 
 function noop() {}

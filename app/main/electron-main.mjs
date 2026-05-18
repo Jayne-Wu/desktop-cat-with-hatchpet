@@ -45,10 +45,6 @@ app.whenReady().then(async () => {
         onSelectCompanionStyle: applyCompanionStyle,
         onToggleClickThrough: applyClickThrough,
         onResetPosition: resetWindowPosition,
-        onTogglePin: async () => {
-          togglePin();
-          await refreshMenus();
-        },
         onSelectLanguage: applyLanguage
       })
     );
@@ -102,10 +98,6 @@ app.whenReady().then(async () => {
         onToggleClickThrough: applyClickThrough,
         onResetPosition: resetWindowPosition,
         onSelectLanguage: applyLanguage,
-        onTogglePin: async () => {
-          togglePin();
-          await refreshMenus();
-        }
       });
     }
 
@@ -128,16 +120,6 @@ app.whenReady().then(async () => {
   ipcMain.handle("pet:animation-state", async (_event, stateId) => {
     movementController?.setAnimationState(stateId);
     return { ok: true };
-  });
-
-  ipcMain.handle("window:toggle-pin", async () => {
-    if (!mainWindow) {
-      return { ok: false };
-    }
-
-    const nextPinned = togglePin();
-    await refreshMenus();
-    return { ok: true, alwaysOnTop: nextPinned };
   });
 
   ipcMain.handle("window:minimize", async () => {
@@ -323,12 +305,6 @@ app.whenReady().then(async () => {
 
     const nextPosition = moveWindowToAnchor(mainWindow, anchor);
     await writeSettings(app.getPath("userData"), { windowPosition: nextPosition });
-  }
-
-  function togglePin() {
-    const nextPinned = !mainWindow.isAlwaysOnTop();
-    mainWindow.setAlwaysOnTop(nextPinned, "screen-saver");
-    return nextPinned;
   }
 
   function resizeWindowForScale(scale, options = {}) {
