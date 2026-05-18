@@ -1,137 +1,93 @@
 # Desktop Cat With Hatchpet
 
-Desktop Cat With Hatchpet 是一个 Windows-first 的 Electron 桌面宠物运行时。它的核心目标是直接复用 Hatchpet/Codex 生成的宠物资源，把 `pet.json` 和 `spritesheet.webp` 作为桌面宠物的原生资产格式，而不是重新设计一套转换流程。
+Desktop Cat With Hatchpet 是一个 Windows-first 的 Electron 桌面宠物运行时。它直接复用 Hatchpet/Codex 生成的宠物资源，把 `pet.json` 和 `spritesheet.webp` 当作原生资产格式，而不是再做一套资源转换流程。
 
-当前版本是一只可运行的本地桌面小猫，默认加载 `pets/xigua/` 下的资源，并以透明、无边框、始终置顶的窗口显示在桌面上。项目更关注轻量、可扩展和本地优先的桌宠体验：资源留在本地，运行时设置写入 Electron 的 `userData` 目录，代码仓库只保存应用源码和资源格式说明。
+当前版本：`v1.4.0`
 
-## Overview
+应用显示名：`Desktop Cat`
 
-这个项目由四个部分组成：
+Windows 打包产物名：`DesktopCat-v${version}.exe`
 
-- Electron 桌面壳：负责窗口、托盘、右键菜单、置顶、隐藏和退出。
-- Hatchpet 资源适配层：扫描 `pets/`，读取 `pet.json`，解析 `spritesheet.webp`。
-- Canvas 动画运行时：按 Codex/Hatchpet atlas 规格裁切帧并播放动画。
-- 轻量陪伴系统：处理点击互动、自动巡游、停留观察和回窝节奏。
+## 当前能力
 
-项目当前面向 Windows 开发和打包，后续可以在不改变宠物资源格式的前提下扩展宠物切换、桌面移动、工作陪伴和多宠物能力。
+- 透明、无边框、始终置顶的桌宠窗口。
+- 内置两只本地宠物：`xigua`（西瓜）和 `simba`（辛巴）。
+- 支持 Codex/Hatchpet 固定 8x9 atlas：`idle`、`running-right`、`running-left`、`waving`、`jumping`、`failed`、`waiting`、`running`、`review`。
+- 支持右键菜单和系统托盘菜单。
+- 支持中文 / English 菜单切换，默认中文。
+- 支持宠物切换、三档尺寸、拖拽摆放、位置重置、置顶切换、显示隐藏和退出。
+- 支持点击穿透，开启后窗口不拦截鼠标，方便把宠物放在工作区上方。
+- 支持四种陪伴风格：安静陪伴、好奇巡视、活泼玩耍、低打扰专注。
+- 支持底部边缘自动移动、停留观察、拖拽后回到底部边缘。
+- 支持点击后的有限动作反馈，不再把每个动作无限循环播放。
 
-## Current Version
+当前还没有实现番茄钟、喝水提醒、日程联动、全屏/会议自动隐藏、长期记忆或多只宠物同时出现。README 只描述当前已经落地的能力；后续规划见 [docs/roadmap.md](docs/roadmap.md)。
 
-`v1.4.0: 工作陪伴版`
+## 快速开始
 
-当前版本的范围是稳定播放本地 Hatchpet/Codex 宠物资源，并提供基础桌面控制能力。已支持：
+建议使用 Node.js 24 和 npm。项目本地开发环境里也可能包含 `.tools/` 下的便携 Node/npm，但它们只用于本机，不会发布到仓库。
 
-- 透明、无边框、始终置顶的 Electron 桌宠窗口。
-- 默认加载 `pets/xigua/pet.json` 和 `pets/xigua/spritesheet.webp`。
-- 支持 9 个 Codex/Hatchpet 动画状态：`idle`、`running-right`、`running-left`、`waving`、`jumping`、`failed`、`waiting`、`running`、`review`。
-- 左键点击触发有限时长的玩耍反馈，并在 `waving`、`jumping`、`review` 之间变化。
-- 右键菜单支持切换陪伴风格：`Quiet`、`Curious`、`Playful`、`Focus`。
-- 右键菜单支持窗口控制：`Pin / Unpin`、`Hide`、`Quit`。
-- 系统托盘支持显示、隐藏、置顶切换和退出。
-- 本地设置存储支持宠物选择、缩放和窗口位置等运行时设置。
-- 支持从右键菜单和托盘切换 `xigua` 与 `simba`。
-- 支持拖拽摆放、三档尺寸切换和一键重置位置。
-- 支持自动贴边巡游、停留观察、拖拽后延迟回窝和长时间无操作后的休息/唤醒行为。
-- 支持点击穿透模式，以及更低打扰的陪伴风格切换。
-- 支持中文 / English 菜单切换。
-- `npm run validate:pets` 可以校验本地宠物 manifest 和 WebP atlas 尺寸。
-
-## Quick Start
-
-1. 安装 Node.js LTS 和 npm。
-
-本项目推荐使用官方 Node.js LTS 工具链。本机开发时也可以使用 `.tools/` 中的本地 Node/npm；`.tools/` 只用于本地环境，不会上传到 GitHub。
-
-2. 安装依赖：
+安装依赖：
 
 ```bash
 npm install
 ```
 
-3. 准备本地宠物资源：
-
-```text
-pets/
-  xigua/
-    pet.json
-    spritesheet.webp
-```
-
-当前默认宠物 id 是 `xigua`，定义在 `app/main/pet-registry.mjs` 的 `DEFAULT_PET_ID`。
-
-4. 校验宠物资源：
+校验宠物资源：
 
 ```bash
 npm run validate:pets
 ```
 
-5. 启动桌面宠物：
+运行测试：
+
+```bash
+npm run test
+```
+
+启动桌宠：
 
 ```bash
 npm run dev
 ```
 
-6. 打包 Windows 安装程序：
+打包 Windows 安装程序：
 
 ```bash
 npm run dist:win
 ```
 
-打包产物会输出到 `dist/`。本地打包会把 `pets/xigua/pet.json` 和 `pets/xigua/spritesheet.webp` 放进安装包，但这些真实宠物资源仍然不会进入 GitHub。
+打包输出在 `dist/`。当前配置会生成类似 `DesktopCat-v1.4.0.exe` 的安装包和对应 `.blockmap`。
 
-## Project Structure
+## 项目结构
 
 ```text
 desktop-cat-with-hatchpet/
   app/
-    main/
-    renderer/
-  docs/
-  pets/
-  scripts/
+    main/                Electron 主进程、窗口、托盘、菜单、设置、移动控制
+    renderer/            Canvas 渲染、动画播放、行为状态映射
+  build/                 应用图标
+  docs/                  架构、资源格式、行为逻辑说明
+  pets/                  本地宠物资源
+  scripts/               校验脚本
+  tests/                 Node test 测试
   package.json
-  package-lock.json
 ```
 
-### Main Process
-
-`app/main/` 负责 Electron 主进程能力，包括应用入口、窗口生命周期、IPC、托盘、右键菜单、宠物资源扫描和本地设置读写。
-
 关键模块：
 
-- `electron-main.mjs`：应用入口，注册 IPC、创建窗口、创建托盘、转发 renderer 日志。
-- `window.mjs`：创建透明、无边框、始终置顶的桌宠窗口。
-- `context-menu.mjs`：提供陪伴风格、置顶切换、隐藏和退出。
-- `tray.mjs`：提供系统托盘菜单。
-- `pet-registry.mjs`：扫描 `pets/`，校验 `pet.json`，读取默认宠物并返回 spritesheet 数据。
-- `settings-store.mjs`：读写本地运行设置。
-- `preload.cjs`：通过安全的 preload bridge 向 renderer 暴露能力。
+- `app/main/electron-main.mjs`：应用入口，注册 IPC，创建窗口和托盘。
+- `app/main/menu-template.mjs`：右键菜单和托盘菜单结构。
+- `app/main/movement-controller.mjs`：桌宠窗口移动、停留、回到底部边缘的主进程控制器。
+- `app/main/settings-store.mjs`：读写本地运行设置。
+- `app/renderer/main.js`：加载宠物、处理点击和拖拽、驱动动画循环。
+- `app/renderer/pet/pet-behavior.js`：把点击、陪伴风格、移动快照和 mood 映射成动画状态。
+- `app/renderer/pet/atlas-player.js`：按当前状态推进 spritesheet 帧。
+- `app/renderer/pet/codex-pet-spec.js`：定义 atlas 行、列、帧数和播放节奏。
 
-### Renderer Runtime
+## 宠物资源格式
 
-`app/renderer/` 负责实际显示和动画播放。页面只包含透明 canvas 和错误提示容器，动画逻辑拆分在 `app/renderer/pet/` 下。
-
-关键模块：
-
-- `main.js`：加载默认宠物、启动动画循环、处理左键互动和右键菜单事件。
-- `codex-pet-spec.js`：定义 Codex/Hatchpet atlas 固定规格。
-- `pet-loader.js`：加载 manifest 和 spritesheet，校验 atlas 尺寸。
-- `atlas-player.js`：根据当前状态和帧时长推进动画。
-- `pet-behavior.js`：将点击注意力、陪伴风格和移动意图映射到动画状态。
-- `pet-renderer.js`：从 spritesheet 裁切当前帧并绘制到 canvas。
-
-### Supporting Files
-
-- `docs/architecture.md`：分层架构和数据流。
-- `docs/behavior-logic.md`：当前桌宠行为、动作触发方式和状态映射说明。
-- `docs/pet-format.md`：Hatchpet/Codex 资源格式说明。
-- `docs/runtime-states.md`：9 个动画状态在桌宠中的语义。
-- `pets/README.md`：本地宠物资源目录说明。
-- `scripts/validate-pets.mjs`：本地宠物资源校验脚本。
-
-## Pet Asset Format
-
-运行时原生支持 Hatchpet/Codex 资源格式：
+运行时原生支持 Hatchpet/Codex 输出结构：
 
 ```text
 pets/<pet-id>/
@@ -139,7 +95,7 @@ pets/<pet-id>/
   spritesheet.webp
 ```
 
-示例 manifest：
+`pet.json` 示例：
 
 ```json
 {
@@ -150,162 +106,84 @@ pets/<pet-id>/
 }
 ```
 
-spritesheet 要求：
+spritesheet 约束：
 
 - 格式：WebP
 - 尺寸：`1536x1872`
 - 网格：8 列 x 9 行
 - 单元格：`192x208`
-- 背景：透明
+- 未使用格子保持透明
 
-当前本地测试资源包括 `xigua` 和 `simba`，但真实宠物资源被 `.gitignore` 忽略，不会上传到 GitHub。仓库只保留 `pets/README.md` 作为目录说明。
+仓库目前白名单提交了 `pets/xigua/` 和 `pets/simba/`。`.gitignore` 默认忽略其他 `pets/*` 目录；如果之后要把新宠物也纳入仓库，需要同步更新 `.gitignore` 白名单。
 
-## Packaging
+## 行为触发逻辑
 
-项目使用 `electron-builder` 生成 Windows 安装包：
+桌宠行为由两层一起决定：
 
-- `npm run pack`：生成未安装的本地应用目录，用于快速检查打包内容。
-- `npm run dist:win`：生成 Windows NSIS 安装程序。
+- 主进程 `MovementController` 决定窗口在桌面上的位置，以及当前处于 `observe`、`settle`、`stroll`、`rehome` 哪个移动阶段。
+- 渲染进程 `PetBehavior` 接收移动快照，结合点击、陪伴风格、mood 和短动作，决定播放哪一行动画。
 
-打包配置位于 `package.json` 的 `build` 字段。当前只包含默认宠物 `xigua` 的运行必需资源：
+动画状态优先级从高到低是：
 
-```text
-pets/xigua/pet.json
-pets/xigua/spritesheet.webp
-```
+1. 点击触发的短动作：`waving`、`jumping`、`review`。
+2. 移动控制器发出的方向移动：`running-left`、`running-right`。
+3. 专注风格下的静止状态：运行时 `still`，锁在 `idle` 第一帧。
+4. 自动观察和停留状态：根据陪伴风格和 mood 映射到 `idle`、`waiting`、`review` 或 `running`。
 
-`pets/xigua/spritesheet.lossless-backup.webp` 和 `pets/simba/` 不会进入安装包。
+主要触发源：
 
-当前 Windows 构建关闭了 `signAndEditExecutable`，因此不会尝试代码签名或修改 exe 元数据；这可以避免普通 Windows 开发环境下解压签名工具时需要符号链接权限。
+- 启动：读取设置，恢复宠物、尺寸、语言、陪伴风格和点击穿透。
+- 左键点击：触发有限时长短动作，并重置互动计时；拖拽后的 click 会被保护逻辑吞掉。
+- 拖拽：移动超过 8px 后进入窗口拖拽，不触发点击动作；松手后如果不在底部边缘，会延迟回到底部。
+- 菜单切换：宠物、尺寸、陪伴风格、语言、点击穿透和位置重置会立即生效并写入设置。
+- 移动循环：主进程每 50ms 更新移动阶段；只有当渲染进程已经切到 `running-left` 或 `running-right` 时，窗口才真正移动。
 
-## Release Workflow
+更完整的中文版说明见 [docs/behavior-logic.zh-CN.md](docs/behavior-logic.zh-CN.md)。英文原版仍保留在 [docs/behavior-logic.md](docs/behavior-logic.md)。
 
-仓库包含一个标签触发和手动触发的 GitHub Actions workflow：
+## 陪伴风格
 
-```text
-.github/workflows/release.yml
-```
+- 安静陪伴 `quiet`：移动慢、停留久，点击反馈较温和。
+- 好奇巡视 `curious`：默认风格，观察、停留、移动之间比较均衡。
+- 活泼玩耍 `playful`：更容易移动，点击后更容易跳跃。
+- 低打扰专注 `focus`：长时间保持静止观察，点击后短暂借用好奇巡视的移动节奏。
 
-触发方式：
+这些风格只影响行为节奏和状态映射，不改变宠物资源本身。
 
-- 推送 `v*` 格式标签，例如 `v1.4.0`。
+## 菜单结构
+
+右键菜单和托盘菜单使用同一套模板，当前分组如下：
+
+- 当前宠物：只读显示当前选择。
+- 宠物：切换 `xigua` / `simba`。
+- 外观：选择小、中、大三档尺寸。
+- 陪伴风格：切换 `quiet` / `curious` / `playful` / `focus`。
+- 交互：点击穿透、置顶 / 取消置顶。
+- 位置：回到屏幕中央、回到右下角。
+- 语言：中文 / English。
+- 显示或隐藏、退出。
+
+## 打包和发布
+
+打包配置在 `package.json` 的 `build` 字段里：
+
+- `productName`：`Desktop Cat`
+- `artifactName`：`DesktopCat-v${version}.${ext}`
+- `icon`：`build/icon.ico`
+- Windows target：NSIS installer
+
+GitHub Actions workflow 位于 `.github/workflows/release.yml`。触发方式：
+
+- 推送 `v*` 标签，例如 `v1.4.0`。
 - 在 GitHub Actions 页面手动运行 `workflow_dispatch`。
 
-workflow 会在 GitHub 的 Windows runner 上执行：
+workflow 会执行 `npm ci`、`npm run validate:pets`、`npm run dist:win -- --publish never`，然后上传安装包、`.blockmap` 和 `latest.yml`。如果是 tag 触发，还会创建或更新对应 GitHub Release。
 
-- `npm ci`
-- 恢复私有宠物资源
-- `npm run validate:pets`
-- `npm run dist:win`
-- 上传构建产物为 Actions artifact
-- 如果当前运行来自 tag，创建或更新 GitHub Release 并上传 Windows 安装包
+## 相关文档
 
-发布标签示例：
-
-```bash
-git tag v1.4.0
-git push origin v1.4.0
-```
-
-### Private Pet Assets
-
-`pets/xigua/` 不上传 GitHub，因此 CI 环境默认拿不到真实宠物资源。自动发布前，需要在 GitHub 仓库的 Actions secrets 中配置：
-
-- `PET_ASSET_ZIP_URL`：私有 ZIP 下载地址。
-- `PET_ASSET_ZIP_TOKEN`：可选，如果下载地址需要 Bearer token。
-
-ZIP 解压后必须包含：
-
-```text
-pets/xigua/pet.json
-pets/xigua/spritesheet.webp
-```
-
-如果没有配置私有资源 ZIP，release workflow 会在 `Restore private pet assets` 步骤失败，并提示缺少资源。这可以避免生成一个没有默认宠物资源的安装包。
-
-## Roadmap
-
-当前版本作为 `v1.4.0` 固化，后续版本按“先好用，再像桌宠，再成为轻陪伴应用”的路线演进。
-
-### v1.1.0 基础可用性版
-
-目标：让用户能长期把它放在桌面上。
-
-- 增加宠物切换：从右键菜单或托盘切换本地宠物。
-- 记住用户选择：保存上次使用的宠物。
-- 支持拖拽摆放：宠物可以移动到桌面任意位置。
-- 记住窗口位置：重启后恢复上次位置。
-- 增加大小控制：提供小、中、大三档缩放。
-- 增加重置位置：宠物不见时可一键回到屏幕中央或右下角。
-
-### v1.2.0 桌宠行为版
-
-目标：让它不再只是循环动画，而是更像一个有响应的桌面伙伴。
-
-- 增加更自然的点击反馈：根据当前状态、点击次数、冷却时间触发不同动作。
-- 增加随机小动作：空闲时偶尔挥手、等待、发呆或查看。
-- 增加简单情绪：开心、无聊、困倦、专注等状态影响动作概率。
-- 增加休息和唤醒：长时间无操作进入安静状态，点击后恢复活跃。
-- 增加动作节奏控制：避免频繁重复同一个动作。
-
-### v1.3.0 桌面移动版
-
-目标：让桌宠真正生活在桌面上。
-
-- 增加桌面走动：宠物可以在屏幕底部或桌面边缘移动。
-- 增加边缘感知：走到屏幕边缘自动回头。
-- 增加停靠规则：可选择靠左、靠右、底部自由移动。
-- 增加点击穿透模式：开启后不影响用户操作桌面和窗口。
-- 增加自动降低存在感：全屏、游戏、会议场景下减少打扰或自动隐藏。
-
-### v1.4.0 工作陪伴版
-
-目标：让桌宠和用户的工作节奏产生轻连接。
-
-- 增加专注模式：动作频率降低，保持安静陪伴。
-- 增加番茄钟：工作一段时间后用动作或轻提示提醒休息。
-- 增加轻提醒：喝水、休息眼睛、站立活动。
-- 增加状态联动入口：可手动切换“工作中 / 等待 / 审查 / 出错 / 完成”等状态。
-- 增加勿扰时间：用户设置时间段内降低互动频率。
-
-### v1.5.0 个性化版
-
-目标：让用户更愿意把它当作自己的桌宠。
-
-- 增加宠物命名：菜单和提示显示自定义名字。
-- 增加透明度控制：适配不同桌面背景。
-- 增加行为频率设置：安静、普通、活跃三档。
-- 增加开机启动选项。
-- 增加简单配饰：帽子、围巾、小物件等轻量装饰。
-
-### v2.0.0 多宠与生态版
-
-目标：从单个桌宠应用扩展成可持续添加内容的平台。
-
-- 支持多宠物同屏。
-- 支持宠物导入：用户可以添加自己的 Hatchpet 资源。
-- 支持宠物管理面板：启用、禁用、删除、预览本地宠物。
-- 支持桌宠专属 manifest 扩展：为桌面行为、默认缩放、推荐锚点、性格参数提供可选配置。
-- 支持插件或事件 hook：为外部工具、工作流、系统状态联动留下入口。
-
-## Repository Notes
-
-以下内容会上传到 GitHub：
-
-- 应用源码
-- README 和 docs
-- `package.json`
-- `package-lock.json`
-- `pets/README.md`
-- `scripts/validate-pets.mjs`
-- GitHub Actions workflow
-
-以下内容不会上传到 GitHub：
-
-- `pets/xigua/`
-- `pets/simba/`
-- `.tools/`
-- `node_modules/`
-- 构建输出目录，例如 `dist/`、`out/`、`release/`
-
-真实宠物资源仅作为本地测试和发布打包资产使用。运行时设置写入 Electron 的 `userData` 目录，不写入宠物资源目录。
+- [docs/behavior-logic.zh-CN.md](docs/behavior-logic.zh-CN.md)：当前行为触发和状态映射中文版。
+- [docs/behavior-logic.md](docs/behavior-logic.md)：行为逻辑英文说明。
+- [docs/architecture.md](docs/architecture.md)：项目分层和数据流。
+- [docs/pet-format.md](docs/pet-format.md)：宠物资源格式。
+- [docs/runtime-states.md](docs/runtime-states.md)：9 个动画状态的语义。
+- [docs/roadmap.md](docs/roadmap.md)：版本路线图和后续规划。
+- [pets/README.md](pets/README.md)：宠物资源目录说明。
