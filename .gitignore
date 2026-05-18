@@ -8,6 +8,8 @@ dist/
 out/
 release/
 
+TODO.md
+
 pets/*
 !pets/README.md
 !pets/simba/
