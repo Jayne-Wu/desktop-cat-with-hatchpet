@@ -3,9 +3,7 @@ import path from "node:path";
 import { DEFAULT_LANGUAGE, normalizeLanguage } from "../shared/menu-i18n.mjs";
 import {
   DEFAULT_COMPANION_STYLE,
-  DEFAULT_CLICK_THROUGH,
   normalizeCompanionStyle,
-  normalizeClickThrough,
 } from "../shared/companion-options.mjs";
 import { DEFAULT_SCALE, normalizeScale } from "../shared/scale-options.mjs";
 
@@ -14,7 +12,6 @@ const DEFAULT_SETTINGS = {
   scale: DEFAULT_SCALE,
   windowPosition: null,
   companionStyle: DEFAULT_COMPANION_STYLE,
-  clickThrough: DEFAULT_CLICK_THROUGH,
   language: DEFAULT_LANGUAGE
 };
 
@@ -58,7 +55,6 @@ function normalizeSettings(settings) {
     scale: normalizeScale(scale),
     windowPosition: position,
     companionStyle: normalizeCompanionStyle(settings?.companionStyle),
-    clickThrough: normalizeClickThrough(settings?.clickThrough),
     language: normalizeLanguage(settings?.language)
   };
 }

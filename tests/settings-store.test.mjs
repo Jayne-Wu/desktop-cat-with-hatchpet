@@ -20,7 +20,7 @@ test("legacy movementMode is ignored in favor of default companion style", async
   const settings = await readSettings(userDataPath);
 
   assert.equal(settings.companionStyle, "curious");
-  assert.equal(settings.clickThrough, true);
+  assert.equal("clickThrough" in settings, false);
   assert.equal("movementMode" in settings, false);
 });
 

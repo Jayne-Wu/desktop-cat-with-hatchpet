@@ -13,5 +13,6 @@ test("menu language supports English labels", () => {
 
   assert.equal(text.companion, "Companion Style");
   assert.equal(text.playful, "Playful");
-  assert.equal(text.clickThrough, "Click Through");
+  assert.equal(text.pin, "Pin");
+  assert.equal(text.unpin, "Unpin");
 });

@@ -2,22 +2,17 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   COMPANION_STYLE_PROFILES,
-  DEFAULT_CLICK_THROUGH,
   DEFAULT_COMPANION_STYLE,
-  normalizeClickThrough,
   normalizeCompanionStyle
 } from "../app/shared/companion-options.mjs";
 
-test("companion defaults are curious and clickable", () => {
+test("companion defaults to curious", () => {
   assert.equal(DEFAULT_COMPANION_STYLE, "curious");
-  assert.equal(DEFAULT_CLICK_THROUGH, false);
 });
 
 test("companion settings normalize unknown persisted values", () => {
   assert.equal(normalizeCompanionStyle("playful"), "playful");
   assert.equal(normalizeCompanionStyle("unknown"), "curious");
-  assert.equal(normalizeClickThrough(true), true);
-  assert.equal(normalizeClickThrough("true"), false);
 });
 
 test("playful profile is more active than quiet profile", () => {

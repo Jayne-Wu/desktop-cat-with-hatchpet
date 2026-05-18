@@ -117,7 +117,6 @@ function createFakeWindow(initialBounds = {}) {
     setPosition: (x, y) => {
       bounds = { ...bounds, x, y };
     },
-    isVisible: () => true,
-    setIgnoreMouseEvents: () => {}
+    isVisible: () => true
   };
 }

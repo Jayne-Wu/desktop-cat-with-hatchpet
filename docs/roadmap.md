@@ -50,7 +50,6 @@ Desktop Cat 的演进顺序是：
 - `observe`、`settle`、`stroll`、`rehome` 移动阶段。
 - 窗口只在 `running-left` / `running-right` 动画激活后移动。
 - 拖拽后延迟回到底部边缘。
-- 点击穿透。
 - 陪伴风格：安静陪伴、好奇巡视、活泼玩耍、低打扰专注。
 - 菜单中文 / English 切换。
 - 菜单按宠物、外观、陪伴风格、交互、位置、语言重新分组。

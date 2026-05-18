@@ -1,9 +1,7 @@
 import electron from "electron";
 import {
   COMPANION_STYLE_PROFILES,
-  DEFAULT_CLICK_THROUGH,
   DEFAULT_COMPANION_STYLE,
-  normalizeClickThrough,
   normalizeCompanionStyle
 } from "../shared/companion-options.mjs";
 
@@ -32,14 +30,12 @@ export class MovementController {
     this.timer = null;
     this.dragging = false;
     this.lastStateKey = null;
-    this.clickThrough = DEFAULT_CLICK_THROUGH;
     this.queuedPhase = null;
     this.rehomeTarget = null;
     this.interactionBoostRemainingMs = 0;
   }
 
   applySettings(settings) {
-    this.setClickThrough(settings?.clickThrough);
     this.setCompanionStyle(settings?.companionStyle);
   }
 
@@ -79,11 +75,6 @@ export class MovementController {
 
   setAnimationState(stateId) {
     this.animationState = typeof stateId === "string" && stateId.trim() !== "" ? stateId : "idle";
-  }
-
-  setClickThrough(value) {
-    this.clickThrough = normalizeClickThrough(value);
-    this.mainWindow.setIgnoreMouseEvents(this.clickThrough, { forward: true });
   }
 
   setDragging(dragging) {

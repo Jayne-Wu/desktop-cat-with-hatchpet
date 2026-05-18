@@ -6,7 +6,6 @@ export const COMPANION_STYLES = [
 ];
 
 export const DEFAULT_COMPANION_STYLE = "curious";
-export const DEFAULT_CLICK_THROUGH = false;
 
 export const COMPANION_STYLE_PROFILES = {
   quiet: {
@@ -69,8 +68,4 @@ export const COMPANION_STYLE_PROFILES = {
 
 export function normalizeCompanionStyle(style) {
   return COMPANION_STYLES.some((option) => option.id === style) ? style : DEFAULT_COMPANION_STYLE;
-}
-
-export function normalizeClickThrough(value) {
-  return value === true;
 }
