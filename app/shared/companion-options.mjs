@@ -62,8 +62,8 @@ export const COMPANION_STYLE_PROFILES = {
     settleToStrollChance: 0,
     interactionBurstMs: 3200,
     interactionCooldownMs: 620,
-    interactionMoveBoostMs: 0,
-    interactionBoostProfileId: null
+    interactionMoveBoostMs: 6500,
+    interactionBoostProfileId: "curious"
   }
 };
 

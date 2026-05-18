@@ -18,12 +18,37 @@ test("focus style does not stroll along the bottom edge", () => {
   });
 
   controller.setCompanionStyle("focus");
-  controller.noteInteraction();
   controller.phase = "observe";
   controller.phaseRemainingMs = 1;
   controller.tick(50);
 
   assert.notEqual(emittedStates.at(-1).phase, "stroll");
+  assert.equal(emittedStates.at(-1).locomotion, "none");
+  controller.stop();
+});
+
+test("focus interaction briefly borrows curious movement", () => {
+  const emittedStates = [];
+  const fakeWindow = createFakeWindow();
+  const controller = new MovementController({
+    mainWindow: fakeWindow,
+    onStateChange: (state) => emittedStates.push(state),
+    onPositionChanged: () => {},
+    random: () => 0.5,
+    screenApi: {
+      getDisplayMatching: () => ({
+        workArea: { x: 0, y: 0, width: 1200, height: 900 }
+      })
+    }
+  });
+
+  controller.setCompanionStyle("focus");
+  controller.noteInteraction();
+  controller.phase = "observe";
+  controller.phaseRemainingMs = 1;
+  controller.tick(50);
+
+  assert.equal(emittedStates.at(-1).phase, "stroll");
   assert.equal(emittedStates.at(-1).locomotion, "none");
   controller.stop();
 });
