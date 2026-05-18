@@ -63,7 +63,9 @@ Responsibilities:
 - transparent always-on-top window
 - tray menu
 - pet selection
-- future settings and startup integration
+- local settings persistence
+- freeform resize and manual drag placement
+- pin / unpin, hide, and quit window controls
 
 ## Current Module Map
 
@@ -72,10 +74,18 @@ app/
   main/
     electron-main.mjs
     preload.cjs
+    menu-template.mjs
+    movement-controller.mjs
     pet-registry.mjs
+    settings-store.mjs
     tray.mjs
     window.mjs
+  shared/
+    companion-options.mjs
+    menu-i18n.mjs
+    scale-options.mjs
   renderer/
+    main.js
     pet/
       codex-pet-spec.js
       pet-loader.js
@@ -101,6 +111,8 @@ app/
 - tray lifecycle
 - window creation
 - asset discovery
+- window movement, resize, and pin state
+- local settings persistence
 
 ### Renderer
 
@@ -109,22 +121,21 @@ app/
 - companion-state mapping
 - drawing
 - local user interactions
+- right-bottom resize grip
 
 ## Planned Evolution
 
 ### Near-Term
 
-- companion styles in the runtime and menu
-- pet scaling
-- drag support
-- pet switching from tray and renderer
+- polish resize and drag affordances
+- improve tray/menu wording and discoverability
+- make focus and quiet modes feel more intentionally calm
 
 ### Mid-Term
 
-- edge-biased strolling with settle/observe/rehome phases
 - richer automatic companion behavior
-- click-through mode
-- settings persistence
+- optional behavior frequency controls
+- work/meeting-aware low-distraction mode
 
 ### Long-Term
 

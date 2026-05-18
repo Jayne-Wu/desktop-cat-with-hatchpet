@@ -31,12 +31,13 @@ The important movement rule today is:
 
 ### 1. Startup
 
-On startup, the renderer reads settings, applies scale, and seeds behavior with the saved `companionStyle`.
+On startup, the renderer reads settings, restores the saved freeform scale, and seeds behavior with the saved `companionStyle`.
 
 Effect:
 
 - pet starts in `observe`
 - `companionStyle` is restored from settings
+- window size is restored from the saved continuous scale value
 - renderer immediately resolves the first animation state
 
 ### 2. Left click on the pet
@@ -152,6 +153,31 @@ Allowed activity region:
 - other positions can exist temporarily after dragging
 - the pet no longer uses vertical edge travel during automatic behavior
 
+### 4. Resizing the pet
+
+Resizing is handled by the right-bottom resize grip in the renderer and window resize IPC in the main process.
+
+Effect:
+
+- the resize grip is a larger invisible hit target in the lower-right corner
+- scale is continuous, not limited to small / medium / large presets
+- resizing keeps the bottom edge visually anchored so the pet does not appear to float
+- the final scale is written to local settings when the pointer is released
+
+### 5. Menus and window controls
+
+The right-click menu and tray menu share the same menu template.
+
+Current menu responsibilities:
+
+- pet switching
+- companion style switching
+- position reset
+- language switching
+- bottom control group: `Pin / Unpin`, `Hide`, `Quit`
+
+Click-through mode has been removed, so the pet remains clickable even if older local settings contain a legacy `clickThrough` value.
+
 ### Companion style profiles
 
 The main tuning values live in `app/shared/companion-options.mjs`.
@@ -180,8 +206,7 @@ The main tuning values live in `app/shared/companion-options.mjs`.
 #### `focus`
 
 - very long observe and settle windows
-- short stroll windows
-- very low chance to start strolling
+- does not start bottom strolling during passive observe / settle
 - on click, gets a temporary movement boost for about 6.5 seconds
 - the movement boost uses the `curious` profile, then expires automatically
 
