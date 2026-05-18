@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { MovementController } from "../app/main/movement-controller.mjs";
 
-test("focus interaction briefly boosts movement before settling back down", () => {
+test("focus style does not stroll along the bottom edge", () => {
   const emittedStates = [];
   const fakeWindow = createFakeWindow();
   const controller = new MovementController({
@@ -19,9 +19,11 @@ test("focus interaction briefly boosts movement before settling back down", () =
 
   controller.setCompanionStyle("focus");
   controller.noteInteraction();
-  controller.tick(1401);
+  controller.phase = "observe";
+  controller.phaseRemainingMs = 1;
+  controller.tick(50);
 
-  assert.equal(emittedStates.at(-1).phase, "stroll");
+  assert.notEqual(emittedStates.at(-1).phase, "stroll");
   assert.equal(emittedStates.at(-1).locomotion, "none");
   controller.stop();
 });

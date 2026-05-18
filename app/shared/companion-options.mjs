@@ -58,12 +58,12 @@ export const COMPANION_STYLE_PROFILES = {
     settleRangeMs: [16000, 26000],
     rehomeDelayRangeMs: [5200, 7600],
     sideTripChance: 0.04,
-    observeToStrollChance: 0.12,
-    settleToStrollChance: 0.08,
+    observeToStrollChance: 0,
+    settleToStrollChance: 0,
     interactionBurstMs: 3200,
     interactionCooldownMs: 620,
-    interactionMoveBoostMs: 6500,
-    interactionBoostProfileId: "curious"
+    interactionMoveBoostMs: 0,
+    interactionBoostProfileId: null
   }
 };
 

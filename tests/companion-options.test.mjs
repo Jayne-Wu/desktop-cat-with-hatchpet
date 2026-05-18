@@ -47,6 +47,8 @@ test("focus profile is intentionally much less mobile", () => {
     COMPANION_STYLE_PROFILES.focus.settleToStrollChance <
       COMPANION_STYLE_PROFILES.quiet.settleToStrollChance
   );
-  assert.equal(COMPANION_STYLE_PROFILES.focus.interactionBoostProfileId, "curious");
-  assert.ok(COMPANION_STYLE_PROFILES.focus.interactionMoveBoostMs > 0);
+  assert.equal(COMPANION_STYLE_PROFILES.focus.observeToStrollChance, 0);
+  assert.equal(COMPANION_STYLE_PROFILES.focus.settleToStrollChance, 0);
+  assert.equal(COMPANION_STYLE_PROFILES.focus.interactionBoostProfileId, null);
+  assert.equal(COMPANION_STYLE_PROFILES.focus.interactionMoveBoostMs, 0);
 });
