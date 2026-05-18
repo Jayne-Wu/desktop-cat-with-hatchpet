@@ -5,10 +5,12 @@ import { showPetContextMenu } from "./context-menu.mjs";
 import { MovementController } from "./movement-controller.mjs";
 import { getDefaultPet, getPetById, getPetSpritesheetDataUrl, getStartupPet, listLocalPets } from "./pet-registry.mjs";
 import { readSettings, writeSettings } from "./settings-store.mjs";
+import { scaleToWindowSize, windowSizeToScale } from "../shared/scale-options.mjs";
 
 let mainWindow = null;
 let tray = null;
 let windowDragState = null;
+let windowResizeState = null;
 let movementController = null;
 let positionPersistTimer = null;
 
@@ -36,12 +38,10 @@ app.whenReady().then(async () => {
         mainWindow,
         pets: state.registry.pets,
         selectedPetId: state.selectedPet?.id ?? null,
-        scale: state.settings.scale,
         companionStyle: state.settings.companionStyle,
         clickThrough: state.settings.clickThrough,
         language: state.settings.language,
         onSelectPet: selectPet,
-        onSelectScale: applyScale,
         onSelectCompanionStyle: applyCompanionStyle,
         onToggleClickThrough: applyClickThrough,
         onResetPosition: resetWindowPosition,
@@ -94,12 +94,10 @@ app.whenReady().then(async () => {
         mainWindow,
         pets: state.registry.pets,
         selectedPetId: state.selectedPet?.id ?? null,
-        scale: state.settings.scale,
         companionStyle: state.settings.companionStyle,
         clickThrough: state.settings.clickThrough,
         language: state.settings.language,
         onSelectPet: selectPet,
-        onSelectScale: applyScale,
         onSelectCompanionStyle: applyCompanionStyle,
         onToggleClickThrough: applyClickThrough,
         onResetPosition: resetWindowPosition,
@@ -175,6 +173,66 @@ app.whenReady().then(async () => {
     return { ok: true };
   });
 
+  ipcMain.handle("window:resize-start", async (_event, pointer) => {
+    if (!mainWindow || !isValidPointer(pointer)) {
+      return { ok: false };
+    }
+
+    const bounds = mainWindow.getBounds();
+    const currentSettings = await readSettings(app.getPath("userData"));
+    clearTimeout(positionPersistTimer);
+    positionPersistTimer = null;
+    movementController?.setDragging(true);
+    windowResizeState = {
+      startScreenX: pointer.screenX,
+      startScreenY: pointer.screenY,
+      startBounds: bounds,
+      scale: currentSettings.scale
+    };
+
+    return { ok: true };
+  });
+
+  ipcMain.handle("window:resize-update", async (_event, pointer) => {
+    if (!mainWindow || !windowResizeState || !isValidPointer(pointer)) {
+      return { ok: false };
+    }
+
+    const deltaX = pointer.screenX - windowResizeState.startScreenX;
+    const deltaY = pointer.screenY - windowResizeState.startScreenY;
+    const requestedWidth = windowResizeState.startBounds.width + deltaX;
+    const requestedHeight = windowResizeState.startBounds.height + deltaY;
+    const nextScale = windowSizeToScale(requestedWidth, requestedHeight);
+
+    resizeWindowForScale(nextScale, { anchorBottom: true, startBounds: windowResizeState.startBounds });
+    windowResizeState.scale = nextScale;
+    mainWindow.webContents.send("pet:scale-changed", nextScale);
+
+    return { ok: true, scale: nextScale };
+  });
+
+  ipcMain.handle("window:resize-end", async () => {
+    if (!mainWindow) {
+      return { ok: false };
+    }
+
+    const finalScale = windowResizeState?.scale;
+    windowResizeState = null;
+    movementController?.setDragging(false);
+
+    if (Number.isFinite(finalScale)) {
+      const [x, y] = mainWindow.getPosition();
+      await writeSettings(app.getPath("userData"), {
+        scale: finalScale,
+        windowPosition: { x, y }
+      });
+      await refreshMenus();
+      return { ok: true, scale: finalScale };
+    }
+
+    return { ok: false };
+  });
+
   ipcMain.handle("window:drag-end", async () => {
     if (!mainWindow) {
       return { ok: false };
@@ -236,6 +294,7 @@ app.whenReady().then(async () => {
 
   async function applyScale(scale) {
     const nextSettings = await writeSettings(app.getPath("userData"), { scale });
+    resizeWindowForScale(nextSettings.scale, { anchorBottom: true });
     mainWindow?.webContents.send("pet:scale-changed", nextSettings.scale);
     await refreshMenus();
   }
@@ -270,6 +329,23 @@ app.whenReady().then(async () => {
     const nextPinned = !mainWindow.isAlwaysOnTop();
     mainWindow.setAlwaysOnTop(nextPinned, "screen-saver");
     return nextPinned;
+  }
+
+  function resizeWindowForScale(scale, options = {}) {
+    if (!mainWindow) {
+      return;
+    }
+
+    const bounds = options.startBounds ?? mainWindow.getBounds();
+    const size = scaleToWindowSize(scale);
+    const nextBounds = {
+      x: bounds.x,
+      y: options.anchorBottom ? bounds.y + bounds.height - size.height : bounds.y,
+      width: size.width,
+      height: size.height
+    };
+
+    mainWindow.setBounds(nextBounds);
   }
 
   async function persistWindowPosition() {

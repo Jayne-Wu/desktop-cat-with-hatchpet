@@ -15,7 +15,7 @@ Windows 打包产物名：`DesktopCat-v${version}.exe`
 - 支持 Codex/Hatchpet 固定 8x9 atlas：`idle`、`running-right`、`running-left`、`waving`、`jumping`、`failed`、`waiting`、`running`、`review`。
 - 支持右键菜单和系统托盘菜单。
 - 支持中文 / English 菜单切换，默认中文。
-- 支持宠物切换、三档尺寸、拖拽摆放、位置重置、置顶切换、显示隐藏和退出。
+- 支持宠物切换、右下角自由拖拽缩放、拖拽摆放、位置重置、置顶切换、显示隐藏和退出。
 - 支持点击穿透，开启后窗口不拦截鼠标，方便把宠物放在工作区上方。
 - 支持四种陪伴风格：安静陪伴、好奇巡视、活泼玩耍、低打扰专注。
 - 支持底部边缘自动移动、停留观察、拖拽后回到底部边缘。
@@ -80,7 +80,7 @@ desktop-cat-with-hatchpet/
 - `app/main/menu-template.mjs`：右键菜单和托盘菜单结构。
 - `app/main/movement-controller.mjs`：桌宠窗口移动、停留、回到底部边缘的主进程控制器。
 - `app/main/settings-store.mjs`：读写本地运行设置。
-- `app/renderer/main.js`：加载宠物、处理点击和拖拽、驱动动画循环。
+- `app/renderer/main.js`：加载宠物、处理点击、拖拽摆放和右下角缩放、驱动动画循环。
 - `app/renderer/pet/pet-behavior.js`：把点击、陪伴风格、移动快照和 mood 映射成动画状态。
 - `app/renderer/pet/atlas-player.js`：按当前状态推进 spritesheet 帧。
 - `app/renderer/pet/codex-pet-spec.js`：定义 atlas 行、列、帧数和播放节奏。
@@ -132,10 +132,11 @@ spritesheet 约束：
 
 主要触发源：
 
-- 启动：读取设置，恢复宠物、尺寸、语言、陪伴风格和点击穿透。
+- 启动：读取设置，恢复宠物、自由缩放尺寸、语言、陪伴风格和点击穿透。
 - 左键点击：触发有限时长短动作，并重置互动计时；拖拽后的 click 会被保护逻辑吞掉。
 - 拖拽：移动超过 8px 后进入窗口拖拽，不触发点击动作；松手后如果不在底部边缘，会延迟回到底部。
-- 菜单切换：宠物、尺寸、陪伴风格、语言、点击穿透和位置重置会立即生效并写入设置。
+- 右下角缩放：把鼠标放到宠物窗口右下角后拖拽，可连续调整大小；松手后尺寸会写入本地设置。
+- 菜单切换：宠物、陪伴风格、语言、点击穿透和位置重置会立即生效并写入设置。
 - 移动循环：主进程每 50ms 更新移动阶段；只有当渲染进程已经切到 `running-left` 或 `running-right` 时，窗口才真正移动。
 
 更完整的中文版说明见 [docs/behavior-logic.zh-CN.md](docs/behavior-logic.zh-CN.md)。英文原版仍保留在 [docs/behavior-logic.md](docs/behavior-logic.md)。
@@ -155,7 +156,6 @@ spritesheet 约束：
 
 - 当前宠物：只读显示当前选择。
 - 宠物：切换 `xigua` / `simba`。
-- 外观：选择小、中、大三档尺寸。
 - 陪伴风格：切换 `quiet` / `curious` / `playful` / `focus`。
 - 交互：点击穿透、置顶 / 取消置顶。
 - 位置：回到屏幕中央、回到右下角。

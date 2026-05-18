@@ -1,20 +1,24 @@
 import { BrowserWindow, screen } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { MAX_SCALE, MIN_SCALE, scaleToWindowSize } from "../shared/scale-options.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const WINDOW_WIDTH = 280;
-const WINDOW_HEIGHT = 300;
 const WINDOW_MARGIN = 24;
 
 export function createMainWindow(settings = {}, appRoot) {
-  const initialPosition = resolveInitialPosition(settings.windowPosition);
+  const initialSize = scaleToWindowSize(settings.scale);
+  const minSize = scaleToWindowSize(MIN_SCALE);
+  const maxSize = scaleToWindowSize(MAX_SCALE);
+  const initialPosition = resolveInitialPosition(settings.windowPosition, initialSize);
 
   const window = new BrowserWindow({
-    width: WINDOW_WIDTH,
-    height: WINDOW_HEIGHT,
-    minWidth: 240,
-    minHeight: 260,
+    width: initialSize.width,
+    height: initialSize.height,
+    minWidth: minSize.width,
+    minHeight: minSize.height,
+    maxWidth: maxSize.width,
+    maxHeight: maxSize.height,
     frame: false,
     transparent: true,
     resizable: false,
@@ -52,22 +56,22 @@ export function moveWindowToAnchor(window, anchor) {
   return { x, y };
 }
 
-function resolveInitialPosition(position) {
+function resolveInitialPosition(position, windowSize) {
   if (!position || typeof position.x !== "number" || typeof position.y !== "number") {
     return null;
   }
 
-  return isPositionVisible(position) ? position : null;
+  return isPositionVisible(position, windowSize) ? position : null;
 }
 
-function isPositionVisible(position) {
+function isPositionVisible(position, windowSize) {
   return screen.getAllDisplays().some((display) => {
     const { x, y, width, height } = display.workArea;
 
     return (
-      position.x >= x - WINDOW_WIDTH + WINDOW_MARGIN &&
+      position.x >= x - windowSize.width + WINDOW_MARGIN &&
       position.x <= x + width - WINDOW_MARGIN &&
-      position.y >= y - WINDOW_HEIGHT + WINDOW_MARGIN &&
+      position.y >= y - windowSize.height + WINDOW_MARGIN &&
       position.y <= y + height - WINDOW_MARGIN
     );
   });

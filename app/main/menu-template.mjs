@@ -1,12 +1,5 @@
 import { LANGUAGE_OPTIONS, getMenuText } from "../shared/menu-i18n.mjs";
 import { COMPANION_STYLES } from "../shared/companion-options.mjs";
-import { SCALE_OPTIONS } from "../shared/scale-options.mjs";
-
-const SCALE_LABEL_KEYS = {
-  small: "small",
-  medium: "medium",
-  large: "large"
-};
 
 const COMPANION_LABEL_KEYS = {
   quiet: "quiet",
@@ -19,13 +12,11 @@ export function buildDesktopPetMenuTemplate({
   mainWindow,
   pets,
   selectedPetId,
-  scale,
   companionStyle,
   clickThrough,
   language,
   visibilityLabel,
   onSelectPet,
-  onSelectScale,
   onSelectCompanionStyle,
   onToggleClickThrough,
   onResetPosition,
@@ -49,15 +40,6 @@ export function buildDesktopPetMenuTemplate({
     {
       label: text.pet,
       submenu: buildPetItems({ text, pets, selectedPetId, onSelectPet })
-    },
-    {
-      label: text.appearance,
-      submenu: [
-        {
-          label: text.size,
-          submenu: buildScaleItems({ text, scale, onSelectScale })
-        }
-      ]
     },
     {
       label: text.companion,
@@ -129,15 +111,6 @@ function buildPetItems({ text, pets, selectedPetId, onSelectPet }) {
     type: "radio",
     checked: pet.id === selectedPetId,
     click: () => onSelectPet(pet.id)
-  }));
-}
-
-function buildScaleItems({ text, scale, onSelectScale }) {
-  return SCALE_OPTIONS.map((option) => ({
-    label: text[SCALE_LABEL_KEYS[option.id]],
-    type: "radio",
-    checked: Math.abs(scale - option.value) < 0.001,
-    click: () => onSelectScale(option.value)
   }));
 }
 

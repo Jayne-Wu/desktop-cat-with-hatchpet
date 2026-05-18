@@ -5,6 +5,7 @@ import { PetRenderer } from "./pet/pet-renderer.js";
 import { DEFAULT_SCALE } from "../shared/scale-options.mjs";
 
 const canvas = document.querySelector("#petCanvas");
+const resizeGrip = document.querySelector("#resizeGrip");
 const errorState = document.querySelector("#errorState");
 const DRAG_THRESHOLD_PX = 8;
 
@@ -20,6 +21,7 @@ const behavior = new PetBehavior({
 let activePet = null;
 let suppressClick = false;
 let dragSession = null;
+let resizeSession = null;
 
 async function activatePet(petRecord) {
   try {
@@ -56,6 +58,12 @@ async function loadStartupState() {
 
 function applyScale(scale) {
   renderer.setScale(Number(scale) || DEFAULT_SCALE);
+}
+
+function resizeCanvasToWindow() {
+  canvas.width = Math.max(1, Math.round(window.innerWidth));
+  canvas.height = Math.max(1, Math.round(window.innerHeight));
+  renderer.clear();
 }
 
 canvas.addEventListener("click", () => {
@@ -116,10 +124,52 @@ canvas.addEventListener("pointercancel", (event) => {
   void finishDrag(event);
 });
 
+resizeGrip.addEventListener("pointerdown", async (event) => {
+  if (event.button !== 0) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+  suppressClick = true;
+  resizeSession = {
+    pointerId: event.pointerId
+  };
+
+  resizeGrip.setPointerCapture(event.pointerId);
+  await window.desktopPet.beginWindowResize({
+    screenX: event.screenX,
+    screenY: event.screenY
+  });
+});
+
+resizeGrip.addEventListener("pointermove", (event) => {
+  if (!resizeSession || event.pointerId !== resizeSession.pointerId) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+  void window.desktopPet.updateWindowResize({
+    screenX: event.screenX,
+    screenY: event.screenY
+  });
+});
+
+resizeGrip.addEventListener("pointerup", (event) => {
+  void finishResize(event);
+});
+
+resizeGrip.addEventListener("pointercancel", (event) => {
+  void finishResize(event);
+});
+
 window.addEventListener("contextmenu", (event) => {
   event.preventDefault();
   window.desktopPet.showPetContextMenu();
 });
+
+window.addEventListener("resize", resizeCanvasToWindow);
 
 window.desktopPet.onPetSelected((petRecord) => {
   void activatePet(petRecord);
@@ -151,6 +201,7 @@ function tick(now) {
   requestAnimationFrame(tick);
 }
 
+resizeCanvasToWindow();
 await loadStartupState();
 requestAnimationFrame(tick);
 
@@ -175,4 +226,25 @@ async function finishDrag(event) {
       suppressClick = false;
     }, 0);
   }
+}
+
+async function finishResize(event) {
+  if (!resizeSession || event.pointerId !== resizeSession.pointerId) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  try {
+    resizeGrip.releasePointerCapture(event.pointerId);
+  } catch {
+    // Ignore capture release errors if the pointer is already gone.
+  }
+
+  resizeSession = null;
+  await window.desktopPet.endWindowResize();
+  setTimeout(() => {
+    suppressClick = false;
+  }, 0);
 }

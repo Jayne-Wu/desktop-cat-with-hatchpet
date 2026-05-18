@@ -29,5 +29,8 @@ contextBridge.exposeInMainWorld("desktopPet", {
   minimize: () => ipcRenderer.invoke("window:minimize"),
   beginWindowDrag: (pointer) => ipcRenderer.invoke("window:drag-start", pointer),
   updateWindowDrag: (pointer) => ipcRenderer.invoke("window:drag-update", pointer),
-  endWindowDrag: () => ipcRenderer.invoke("window:drag-end")
+  endWindowDrag: () => ipcRenderer.invoke("window:drag-end"),
+  beginWindowResize: (pointer) => ipcRenderer.invoke("window:resize-start", pointer),
+  updateWindowResize: (pointer) => ipcRenderer.invoke("window:resize-update", pointer),
+  endWindowResize: () => ipcRenderer.invoke("window:resize-end")
 });

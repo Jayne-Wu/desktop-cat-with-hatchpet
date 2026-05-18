@@ -12,17 +12,45 @@ body {
 }
 
 body {
-  display: grid;
-  place-items: center;
+  position: relative;
   font-family: "Segoe UI", "Helvetica Neue", sans-serif;
   color: #fff;
   user-select: none;
 }
 
 #petCanvas {
-  width: 280px;
-  height: 300px;
+  display: block;
+  width: 100vw;
+  height: 100vh;
   image-rendering: auto;
+}
+
+#resizeGrip {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 92px;
+  height: 92px;
+  cursor: nwse-resize;
+}
+
+#resizeGrip::after {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 16px;
+  height: 16px;
+  border-right: 2px solid rgba(255, 255, 255, 0);
+  border-bottom: 2px solid rgba(255, 255, 255, 0);
+  border-radius: 2px;
+  content: "";
+  transition: border-color 120ms ease;
+}
+
+#resizeGrip:hover::after,
+#resizeGrip:active::after {
+  border-color: rgba(255, 255, 255, 0.56);
 }
 
 .error-state {
