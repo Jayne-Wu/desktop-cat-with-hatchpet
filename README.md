@@ -2,7 +2,7 @@
 
 Desktop Cat With Hatchpet 是一个 Windows-first 的 Electron 桌面宠物运行时。它直接复用 Hatchpet/Codex 生成的宠物资源，把 `pet.json` 和 `spritesheet.webp` 当作原生资产格式，而不是再做一套资源转换流程。
 
-当前版本：`v1.4.1`
+当前版本：`v1.5.0`
 
 应用显示名：`Desktop Cat`
 
@@ -56,7 +56,7 @@ npm run dev
 npm run dist:win
 ```
 
-打包输出在 `dist/`。当前配置会生成类似 `DesktopCat-v1.4.1.exe` 的安装包和对应 `.blockmap`。
+打包输出在 `dist/`。当前配置会生成类似 `DesktopCat-v1.5.0.exe` 的安装包和对应 `.blockmap`。
 
 ## 项目结构
 
@@ -156,7 +156,7 @@ spritesheet 约束：
 右键菜单和托盘菜单使用同一套模板，当前分组如下：
 
 - 当前宠物：只读显示当前选择。
-- 宠物：切换 `xigua` / `simba`。
+- 宠物：导入本地 Hatchpet/Codex 宠物文件夹，或切换 `xigua` / `simba` / 已导入宠物。
 - 陪伴风格：切换 `quiet` / `curious` / `playful` / `focus`。
 - 语言：中文 / English。
 - 位置：回到屏幕中央、回到右下角。
@@ -173,7 +173,7 @@ spritesheet 约束：
 
 GitHub Actions workflow 位于 `.github/workflows/release.yml`。触发方式：
 
-- 推送 `v*` 标签，例如 `v1.4.1`。
+- 推送 `v*` 标签，例如 `v1.5.0`。
 - 在 GitHub Actions 页面手动运行 `workflow_dispatch`。
 
 workflow 会执行 `npm ci`、`npm run validate:pets`、`npm run dist:win -- --publish never`，然后上传安装包、`.blockmap` 和 `latest.yml`。如果是 tag 触发，还会创建或更新对应 GitHub Release。
