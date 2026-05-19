@@ -1,10 +1,18 @@
-import { app, ipcMain } from "electron";
+import { app, dialog, ipcMain } from "electron";
 import { createMainWindow, moveWindowToAnchor } from "./window.mjs";
 import { buildTrayMenu, createTray } from "./tray.mjs";
 import { showPetContextMenu } from "./context-menu.mjs";
 import { MovementController } from "./movement-controller.mjs";
-import { getDefaultPet, getPetById, getPetSpritesheetDataUrl, getStartupPet, listLocalPets } from "./pet-registry.mjs";
+import {
+  getDefaultPet,
+  getPetById,
+  getPetSpritesheetDataUrl,
+  getStartupPet,
+  importPetFromDirectory,
+  listAvailablePets
+} from "./pet-registry.mjs";
 import { readSettings, writeSettings } from "./settings-store.mjs";
+import { getMenuText } from "../shared/menu-i18n.mjs";
 import { scaleToWindowSize, windowSizeToScale } from "../shared/scale-options.mjs";
 
 let mainWindow = null;
@@ -41,6 +49,7 @@ app.whenReady().then(async () => {
         companionStyle: state.settings.companionStyle,
         language: state.settings.language,
         onSelectPet: selectPet,
+        onImportPet: importPet,
         onSelectCompanionStyle: applyCompanionStyle,
         onResetPosition: resetWindowPosition,
         onTogglePin: async () => {
@@ -69,7 +78,7 @@ app.whenReady().then(async () => {
   });
 
   ipcMain.handle("pets:list", async () => {
-    return listLocalPets(app.getAppPath());
+    return listAvailablePets(app.getAppPath(), app.getPath("userData"));
   });
 
   ipcMain.handle("pets:default", async () => {
@@ -78,11 +87,15 @@ app.whenReady().then(async () => {
 
   ipcMain.handle("pets:startup", async () => {
     const currentSettings = await readSettings(app.getPath("userData"));
-    return getStartupPet(app.getAppPath(), currentSettings.selectedPetId);
+    return getStartupPet(app.getAppPath(), currentSettings.selectedPetId, app.getPath("userData"));
   });
 
   ipcMain.handle("pets:spritesheet-data-url", async (_event, petId) => {
-    return getPetSpritesheetDataUrl(app.getAppPath(), petId);
+    return getPetSpritesheetDataUrl(app.getAppPath(), petId, app.getPath("userData"));
+  });
+
+  ipcMain.handle("pets:import", async (_event, sourceDir) => {
+    return importPetFromSource(sourceDir);
   });
 
   ipcMain.handle("pet:show-context-menu", async () => {
@@ -95,6 +108,7 @@ app.whenReady().then(async () => {
         companionStyle: state.settings.companionStyle,
         language: state.settings.language,
         onSelectPet: selectPet,
+        onImportPet: importPet,
         onSelectCompanionStyle: applyCompanionStyle,
         onResetPosition: resetWindowPosition,
         onTogglePin: async () => {
@@ -264,7 +278,7 @@ app.whenReady().then(async () => {
 
   async function getUiState() {
     const [registry, currentSettings] = await Promise.all([
-      listLocalPets(app.getAppPath()),
+      listAvailablePets(app.getAppPath(), app.getPath("userData")),
       readSettings(app.getPath("userData"))
     ]);
 
@@ -282,10 +296,41 @@ app.whenReady().then(async () => {
   }
 
   async function selectPet(petId) {
-    const pet = await getPetById(app.getAppPath(), petId);
+    const pet = await getPetById(app.getAppPath(), petId, app.getPath("userData"));
     await writeSettings(app.getPath("userData"), { selectedPetId: pet.id });
     mainWindow?.webContents.send("pet:selected", pet);
     await refreshMenus();
+  }
+
+  async function importPet() {
+    const currentSettings = await readSettings(app.getPath("userData"));
+    const text = getMenuText(currentSettings.language);
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: text.importPetDialogTitle,
+      buttonLabel: text.importPetButton,
+      properties: ["openDirectory"]
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return { ok: false, canceled: true };
+    }
+
+    return importPetFromSource(result.filePaths[0]);
+  }
+
+  async function importPetFromSource(sourceDir) {
+    try {
+      const { pet } = await importPetFromDirectory(app.getAppPath(), app.getPath("userData"), sourceDir);
+      await writeSettings(app.getPath("userData"), { selectedPetId: pet.id });
+      mainWindow?.webContents.send("pet:selected", pet);
+      await refreshMenus();
+      return { ok: true, pet };
+    } catch (error) {
+      const currentSettings = await readSettings(app.getPath("userData"));
+      const text = getMenuText(currentSettings.language);
+      dialog.showErrorBox(text.importPetFailed, error.message);
+      return { ok: false, error: error.message };
+    }
   }
 
   async function applyScale(scale) {

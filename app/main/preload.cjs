@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld("desktopPet", {
   getDefaultPet: () => ipcRenderer.invoke("pets:default"),
   getStartupPet: () => ipcRenderer.invoke("pets:startup"),
   listPets: () => ipcRenderer.invoke("pets:list"),
+  importPet: (sourceDir) => ipcRenderer.invoke("pets:import", sourceDir),
   getSpritesheetDataUrl: (petId) => ipcRenderer.invoke("pets:spritesheet-data-url", petId),
   showPetContextMenu: () => ipcRenderer.invoke("pet:show-context-menu"),
   notifyInteraction: () => ipcRenderer.invoke("pet:interaction"),

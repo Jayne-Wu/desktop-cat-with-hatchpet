@@ -11,6 +11,7 @@ test("pin toggle lives with visibility controls and click through is removed", (
     language: "en-US",
     visibilityLabel: "Hide",
     onSelectPet: noop,
+    onImportPet: noop,
     onSelectCompanionStyle: noop,
     onResetPosition: noop,
     onTogglePin: noop,
@@ -31,6 +32,36 @@ test("pin toggle lives with visibility controls and click through is removed", (
   assert.equal(unpinIndex, hideIndex - 1);
   assert.equal(interaction, undefined);
   assert.equal(actionTest, undefined);
+});
+
+test("pet menu exposes import before pet choices", () => {
+  const menu = buildDesktopPetMenuTemplate({
+    mainWindow: fakeWindow(),
+    pets: [
+      {
+        id: "xigua",
+        displayName: "Xigua"
+      }
+    ],
+    selectedPetId: "xigua",
+    companionStyle: "curious",
+    language: "en-US",
+    visibilityLabel: "Hide",
+    onSelectPet: noop,
+    onImportPet: noop,
+    onSelectCompanionStyle: noop,
+    onResetPosition: noop,
+    onTogglePin: noop,
+    onSelectLanguage: noop,
+    onVisibilityToggle: noop,
+    onQuit: noop
+  });
+
+  const petMenu = menu.find((item) => item.label === "Pet");
+
+  assert.equal(petMenu.submenu[0].label, "Import Pet…");
+  assert.equal(petMenu.submenu[1].type, "separator");
+  assert.equal(petMenu.submenu[2].label, "Xigua");
 });
 
 function fakeWindow() {

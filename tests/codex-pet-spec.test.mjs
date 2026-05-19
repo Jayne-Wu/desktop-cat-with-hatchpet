@@ -7,6 +7,7 @@ import {
   FEEDBACK_JUMPING_DURATIONS_MS,
   FEEDBACK_RUNNING_DURATIONS_MS,
   FEEDBACK_WAVING_DURATIONS_MS,
+  REVIEW_DURATIONS_MS,
   getStateCycleDurationMs,
   getStateSpec
 } from "../app/renderer/pet/codex-pet-spec.js";
@@ -24,9 +25,15 @@ test("directional locomotion keeps the fast movement pacing", () => {
 });
 
 test("static companion states share the slow lingering pacing", () => {
-  for (const stateId of ["idle", "waiting", "review"]) {
+  for (const stateId of ["idle", "waiting"]) {
     assert.deepEqual(getStateSpec(stateId).durationsMs, COMPANION_IDLE_DURATIONS_MS);
   }
+});
+
+test("review keeps its own brisker reading cadence", () => {
+  assert.deepEqual(getStateSpec("review").durationsMs, REVIEW_DURATIONS_MS);
+  assert.ok(getStateCycleDurationMs("review") < getStateCycleDurationMs("idle"));
+  assert.ok(getStateCycleDurationMs("review") > getStateCycleDurationMs("running"));
 });
 
 test("feedback states keep a separate more responsive pacing", () => {

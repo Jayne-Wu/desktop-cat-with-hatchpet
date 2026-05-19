@@ -10,6 +10,7 @@ export const FEEDBACK_WAVING_DURATIONS_MS = [240, 220, 280, 980];
 export const FEEDBACK_JUMPING_DURATIONS_MS = [220, 180, 220, 180, 880];
 export const FEEDBACK_FAILED_DURATIONS_MS = [320, 240, 340, 260, 360, 280, 420, 1280];
 export const FEEDBACK_RUNNING_DURATIONS_MS = [220, 180, 220, 180, 260, 820];
+export const REVIEW_DURATIONS_MS = [980, 260, 340, 260, 520, 1320];
 
 export const ATLAS_STATES = [
   { id: "idle", row: 0, durationsMs: [...COMPANION_IDLE_DURATIONS_MS] },
@@ -20,7 +21,7 @@ export const ATLAS_STATES = [
   { id: "failed", row: 5, durationsMs: [...FEEDBACK_FAILED_DURATIONS_MS] },
   { id: "waiting", row: 6, durationsMs: [...COMPANION_IDLE_DURATIONS_MS] },
   { id: "running", row: 7, durationsMs: [...FEEDBACK_RUNNING_DURATIONS_MS] },
-  { id: "review", row: 8, durationsMs: [...COMPANION_IDLE_DURATIONS_MS] }
+  { id: "review", row: 8, durationsMs: [...REVIEW_DURATIONS_MS] }
 ];
 
 export function getStateSpec(stateId) {

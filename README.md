@@ -15,7 +15,7 @@ Windows 打包产物名：`DesktopCat-v${version}.exe`
 - 支持 Codex/Hatchpet 固定 8x9 atlas：`idle`、`running-right`、`running-left`、`waving`、`jumping`、`failed`、`waiting`、`running`、`review`。
 - 支持右键菜单和系统托盘菜单。
 - 支持中文 / English 菜单切换，默认中文。
-- 支持宠物切换、右下角自由拖拽缩放、拖拽摆放、位置重置、置顶切换、显示隐藏和退出。
+- 支持宠物切换、本地 Hatchpet/Codex 宠物导入、右下角自由拖拽缩放、拖拽摆放、位置重置、置顶切换、显示隐藏和退出。
 - 支持四种陪伴风格：安静陪伴、好奇巡视、活泼玩耍、低打扰专注。
 - 支持底部边缘自动移动、停留观察、拖拽后回到底部边缘。
 - 支持点击后的有限动作反馈，不再把每个动作无限循环播放。
@@ -114,6 +114,8 @@ spritesheet 约束：
 - 未使用格子保持透明
 
 仓库目前白名单提交了 `pets/xigua/` 和 `pets/simba/`。`.gitignore` 默认忽略其他 `pets/*` 目录；如果之后要把新宠物也纳入仓库，需要同步更新 `.gitignore` 白名单。
+
+运行中的应用可以从宠物菜单选择“导入宠物…”导入本地 Hatchpet/Codex 宠物文件夹。导入会校验 `pet.json`、WebP 文件和 `1536x1872` atlas 尺寸，并把资源复制到应用的用户数据目录，不会写入安装包内的 `pets/`。
 
 ## 行为触发逻辑
 

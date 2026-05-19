@@ -16,6 +16,7 @@ export function buildDesktopPetMenuTemplate({
   language,
   visibilityLabel,
   onSelectPet,
+  onImportPet,
   onSelectCompanionStyle,
   onResetPosition,
   onTogglePin,
@@ -37,7 +38,7 @@ export function buildDesktopPetMenuTemplate({
     },
     {
       label: text.pet,
-      submenu: buildPetItems({ text, pets, selectedPetId, onSelectPet })
+      submenu: buildPetItems({ text, pets, selectedPetId, onSelectPet, onImportPet })
     },
     {
       label: text.companion,
@@ -83,9 +84,18 @@ export function buildDesktopPetMenuTemplate({
   ];
 }
 
-function buildPetItems({ text, pets, selectedPetId, onSelectPet }) {
+function buildPetItems({ text, pets, selectedPetId, onSelectPet, onImportPet }) {
+  const importItem = {
+    label: text.importPet,
+    click: onImportPet
+  };
+
   if (pets.length === 0) {
     return [
+      importItem,
+      {
+        type: "separator"
+      },
       {
         label: text.noPetsFound,
         enabled: false
@@ -93,12 +103,18 @@ function buildPetItems({ text, pets, selectedPetId, onSelectPet }) {
     ];
   }
 
-  return pets.map((pet) => ({
-    label: pet.displayName,
-    type: "radio",
-    checked: pet.id === selectedPetId,
-    click: () => onSelectPet(pet.id)
-  }));
+  return [
+    importItem,
+    {
+      type: "separator"
+    },
+    ...pets.map((pet) => ({
+      label: pet.displayName,
+      type: "radio",
+      checked: pet.id === selectedPetId,
+      click: () => onSelectPet(pet.id)
+    }))
+  ];
 }
 
 function buildCompanionItems({ text, companionStyle, onSelectCompanionStyle }) {
