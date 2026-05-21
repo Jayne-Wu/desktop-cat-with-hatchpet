@@ -97,6 +97,15 @@ Desktop Cat 的演进顺序是：
 - 双击宠物可回到正常桌面状态；托盘菜单也提供“回到桌面状态”兜底。
 - 任务栏形态会持续重新声明置顶层级，降低被 Windows 任务栏交互覆盖的概率。
 
+### v1.5.2 Windows 图标修复
+
+目标：确保其他电脑下载安装后也显示自定义 Desktop Cat 图标，而不是默认 Electron 图标。
+
+已完成：
+
+- 移除会阻止 electron-builder 写入 exe 图标资源的 `signAndEditExecutable: false` 配置。
+- 显式配置 Windows app exe、NSIS installer 和 uninstaller 都使用 `build/icon.ico`。
+
 ## 后续规划
 
 ### 工作陪伴

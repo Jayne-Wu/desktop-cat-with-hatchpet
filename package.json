@@ -1,6 +1,6 @@
 {
   "name": "desktop-cat-with-hatchpet",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "private": true,
   "description": "A desktop pet runtime that reuses Codex/Hatchpet pet assets.",
   "type": "module",
@@ -33,11 +33,13 @@
     "icon": "build/icon.ico",
     "win": {
       "target": "nsis",
-      "signAndEditExecutable": false
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
     }
   },
   "devDependencies": {
