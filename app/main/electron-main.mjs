@@ -52,11 +52,17 @@ app.whenReady().then(async () => {
         onImportPet: importPet,
         onSelectCompanionStyle: applyCompanionStyle,
         onResetPosition: resetWindowPosition,
+        onEnterTaskbarMode: enterTaskbarMode,
+        onExitTaskbarMode: async () => {
+          exitTaskbarMode();
+          await refreshMenus();
+        },
         onTogglePin: async () => {
           togglePin();
           await refreshMenus();
         },
-        onSelectLanguage: applyLanguage
+        onSelectLanguage: applyLanguage,
+        taskbarMode: movementController?.isTaskbarMode() ?? false
       })
     );
   };
@@ -99,6 +105,10 @@ app.whenReady().then(async () => {
   });
 
   ipcMain.handle("pet:show-context-menu", async () => {
+    if (movementController?.isTaskbarMode()) {
+      return { ok: true, disabled: true };
+    }
+
     if (mainWindow) {
       const state = await getUiState();
       showPetContextMenu({
@@ -111,11 +121,17 @@ app.whenReady().then(async () => {
         onImportPet: importPet,
         onSelectCompanionStyle: applyCompanionStyle,
         onResetPosition: resetWindowPosition,
+        onEnterTaskbarMode: enterTaskbarMode,
+        onExitTaskbarMode: async () => {
+          exitTaskbarMode();
+          await refreshMenus();
+        },
         onTogglePin: async () => {
           togglePin();
           await refreshMenus();
         },
         onSelectLanguage: applyLanguage,
+        taskbarMode: movementController?.isTaskbarMode() ?? false
       });
     }
 
@@ -156,7 +172,7 @@ app.whenReady().then(async () => {
   });
 
   ipcMain.handle("window:drag-start", async (_event, pointer) => {
-    if (!mainWindow || !isValidPointer(pointer)) {
+    if (!mainWindow || movementController?.isTaskbarMode() || !isValidPointer(pointer)) {
       return { ok: false };
     }
 
@@ -184,7 +200,7 @@ app.whenReady().then(async () => {
   });
 
   ipcMain.handle("window:resize-start", async (_event, pointer) => {
-    if (!mainWindow || !isValidPointer(pointer)) {
+    if (!mainWindow || movementController?.isTaskbarMode() || !isValidPointer(pointer)) {
       return { ok: false };
     }
 
@@ -251,6 +267,12 @@ app.whenReady().then(async () => {
     windowDragState = null;
     movementController?.setDragging(false);
     await persistWindowPosition();
+    return { ok: true };
+  });
+
+  ipcMain.handle("window:exit-taskbar-mode", async () => {
+    exitTaskbarMode();
+    await refreshMenus();
     return { ok: true };
   });
 
@@ -356,8 +378,19 @@ app.whenReady().then(async () => {
       return;
     }
 
+    exitTaskbarMode();
     const nextPosition = moveWindowToAnchor(mainWindow, anchor);
     await writeSettings(app.getPath("userData"), { windowPosition: nextPosition });
+    await refreshMenus();
+  }
+
+  async function enterTaskbarMode() {
+    movementController?.enterTaskbarMode();
+    await refreshMenus();
+  }
+
+  function exitTaskbarMode() {
+    movementController?.exitTaskbarMode();
   }
 
   function togglePin() {
@@ -395,6 +428,10 @@ app.whenReady().then(async () => {
   }
 
   function schedulePersistWindowPosition(options = {}) {
+    if (movementController?.isTaskbarMode()) {
+      return;
+    }
+
     if (options.immediate) {
       clearTimeout(positionPersistTimer);
       positionPersistTimer = null;

@@ -1,6 +1,6 @@
 {
   "name": "desktop-cat-with-hatchpet",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
   "description": "A desktop pet runtime that reuses Codex/Hatchpet pet assets.",
   "type": "module",

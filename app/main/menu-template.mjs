@@ -19,10 +19,13 @@ export function buildDesktopPetMenuTemplate({
   onImportPet,
   onSelectCompanionStyle,
   onResetPosition,
+  onEnterTaskbarMode,
+  onExitTaskbarMode,
   onTogglePin,
   onSelectLanguage,
   onVisibilityToggle,
-  onQuit
+  onQuit,
+  taskbarMode = false
 }) {
   const text = getMenuText(language);
   const currentPet = pets.find((pet) => pet.id === selectedPetId) ?? pets[0] ?? null;
@@ -49,11 +52,27 @@ export function buildDesktopPetMenuTemplate({
       submenu: [
         {
           label: text.center,
+          enabled: !taskbarMode,
           click: () => onResetPosition("center")
         },
         {
           label: text.bottomRight,
+          enabled: !taskbarMode,
           click: () => onResetPosition("bottom-right")
+        },
+        {
+          type: "separator"
+        },
+        {
+          label: taskbarMode ? text.backToDesktop : text.taskbarRun,
+          click: () => {
+            if (taskbarMode) {
+              onExitTaskbarMode();
+              return;
+            }
+
+            onEnterTaskbarMode();
+          }
         }
       ]
     },

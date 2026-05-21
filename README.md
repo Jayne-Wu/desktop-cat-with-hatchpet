@@ -2,7 +2,7 @@
 
 Desktop Cat With Hatchpet 是一个 Windows-first 的 Electron 桌面宠物运行时。它直接复用 Hatchpet/Codex 生成的宠物资源，把 `pet.json` 和 `spritesheet.webp` 当作原生资产格式，而不是再做一套资源转换流程。
 
-当前版本：`v1.5.0`
+当前版本：`v1.5.1`
 
 应用显示名：`Desktop Cat`
 
@@ -10,14 +10,25 @@ Windows 打包产物名：`DesktopCat-v${version}.exe`
 
 ## 当前能力
 
-- 透明、无边框、始终置顶的桌宠窗口。
+宠物资源：
+
 - 内置两只本地宠物：`xigua`（西瓜）和 `simba`（辛巴）。
+- 支持导入本地 Hatchpet/Codex 宠物文件夹，并在应用内校验、复制和切换。
 - 支持 Codex/Hatchpet 固定 8x9 atlas：`idle`、`running-right`、`running-left`、`waving`、`jumping`、`failed`、`waiting`、`running`、`review`。
+
+窗口和菜单：
+
+- 透明、无边框、始终置顶的桌宠窗口。
 - 支持右键菜单和系统托盘菜单。
 - 支持中文 / English 菜单切换，默认中文。
-- 支持宠物切换、本地 Hatchpet/Codex 宠物导入、右下角自由拖拽缩放、拖拽摆放、位置重置、置顶切换、显示隐藏和退出。
+- 支持宠物切换、位置重置、置顶切换、显示隐藏和退出。
+- 支持右下角自由拖拽缩放、拖拽摆放，以及覆盖任务栏的慢跑形态。
+
+行为表现：
+
 - 支持四种陪伴风格：安静陪伴、好奇巡视、活泼玩耍、低打扰专注。
 - 支持底部边缘自动移动、停留观察、拖拽后回到底部边缘。
+- 支持任务栏慢跑形态：窗口缩到任务栏厚度内，覆盖任务栏移动；右键菜单在该形态下禁用，双击宠物可回到正常桌面状态。
 - 支持点击后的有限动作反馈，不再把每个动作无限循环播放。
 
 当前还没有实现番茄钟、喝水提醒、日程联动、全屏/会议自动隐藏、长期记忆或多只宠物同时出现。README 只描述当前已经落地的能力；后续规划见 [docs/roadmap.md](docs/roadmap.md)。
@@ -56,7 +67,7 @@ npm run dev
 npm run dist:win
 ```
 
-打包输出在 `dist/`。当前配置会生成类似 `DesktopCat-v1.5.0.exe` 的安装包和对应 `.blockmap`。
+打包输出在 `dist/`。当前配置会生成类似 `DesktopCat-v1.5.1.exe` 的安装包和对应 `.blockmap`。
 
 ## 项目结构
 
@@ -77,7 +88,7 @@ desktop-cat-with-hatchpet/
 
 - `app/main/electron-main.mjs`：应用入口，注册 IPC，创建窗口和托盘。
 - `app/main/menu-template.mjs`：右键菜单和托盘菜单结构。
-- `app/main/movement-controller.mjs`：桌宠窗口移动、停留、回到底部边缘的主进程控制器。
+- `app/main/movement-controller.mjs`：桌宠窗口移动、停留、回到底部边缘和任务栏慢跑形态的主进程控制器。
 - `app/main/settings-store.mjs`：读写本地运行设置。
 - `app/renderer/main.js`：加载宠物、处理点击、拖拽摆放和右下角缩放、驱动动画循环。
 - `app/renderer/pet/pet-behavior.js`：把点击、陪伴风格、移动快照和 mood 映射成动画状态。
@@ -121,7 +132,7 @@ spritesheet 约束：
 
 桌宠行为由两层一起决定：
 
-- 主进程 `MovementController` 决定窗口在桌面上的位置，以及当前处于 `observe`、`settle`、`stroll`、`rehome` 哪个移动阶段。
+- 主进程 `MovementController` 决定窗口在桌面上的位置，以及当前处于 `observe`、`settle`、`stroll`、`rehome` 或 `taskbar` 哪个移动阶段。
 - 渲染进程 `PetBehavior` 接收移动快照，结合点击、陪伴风格、mood 和短动作，决定播放哪一行动画。
 
 动画状态优先级从高到低是：
@@ -137,6 +148,7 @@ spritesheet 约束：
 - 左键点击：触发有限时长短动作，并重置互动计时；拖拽后的 click 会被保护逻辑吞掉。
 - 拖拽：移动超过 8px 后进入窗口拖拽，不触发点击动作；松手后如果不在底部边缘，会延迟回到底部。
 - 右下角缩放：把鼠标放到宠物窗口右下角后拖拽，可连续调整大小；松手后尺寸会写入本地设置。
+- 任务栏慢跑：从位置菜单进入；主进程会识别任务栏在上、下、左、右哪一侧，把窗口缩进任务栏区域并保持在任务栏上层；该形态下宠物窗口不弹右键菜单，双击宠物回到桌面状态。
 - 菜单切换：宠物、陪伴风格、语言、位置重置和窗口控制会立即生效。
 - 移动循环：主进程每 50ms 更新移动阶段；只有当渲染进程已经切到 `running-left` 或 `running-right` 时，窗口才真正移动。
 
@@ -159,7 +171,7 @@ spritesheet 约束：
 - 宠物：导入本地 Hatchpet/Codex 宠物文件夹，或切换 `xigua` / `simba` / 已导入宠物。
 - 陪伴风格：切换 `quiet` / `curious` / `playful` / `focus`。
 - 语言：中文 / English。
-- 位置：回到屏幕中央、回到右下角。
+- 位置：回到屏幕中央、回到右下角、在任务栏上慢跑 / 回到桌面状态。
 - 底部窗口控制区：置顶 / 取消置顶、显示或隐藏、退出。
 
 ## 打包和发布
@@ -173,7 +185,7 @@ spritesheet 约束：
 
 GitHub Actions workflow 位于 `.github/workflows/release.yml`。触发方式：
 
-- 推送 `v*` 标签，例如 `v1.5.0`。
+- 推送 `v*` 标签，例如 `v1.5.1`。
 - 在 GitHub Actions 页面手动运行 `workflow_dispatch`。
 
 workflow 会执行 `npm ci`、`npm run validate:pets`、`npm run dist:win -- --publish never`，然后上传安装包、`.blockmap` 和 `latest.yml`。如果是 tag 触发，还会创建或更新对应 GitHub Release。

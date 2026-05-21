@@ -3,11 +3,14 @@ import { AtlasPlayer } from "./pet/atlas-player.js";
 import { PetBehavior } from "./pet/pet-behavior.js";
 import { PetRenderer } from "./pet/pet-renderer.js";
 import { DEFAULT_SCALE } from "../shared/scale-options.mjs";
+import { CELL_HEIGHT } from "./pet/codex-pet-spec.js";
 
 const canvas = document.querySelector("#petCanvas");
 const resizeGrip = document.querySelector("#resizeGrip");
 const errorState = document.querySelector("#errorState");
 const DRAG_THRESHOLD_PX = 8;
+const TASKBAR_DOUBLE_CLICK_MS = 520;
+const TASKBAR_DOUBLE_CLICK_DISTANCE_PX = 12;
 
 const renderer = new PetRenderer(canvas);
 const player = new AtlasPlayer();
@@ -22,6 +25,9 @@ let activePet = null;
 let suppressClick = false;
 let dragSession = null;
 let resizeSession = null;
+let runtimeMode = "desktop";
+let desktopScale = DEFAULT_SCALE;
+let taskbarClickCandidate = null;
 
 async function activatePet(petRecord) {
   try {
@@ -57,16 +63,27 @@ async function loadStartupState() {
 }
 
 function applyScale(scale) {
-  renderer.setScale(Number(scale) || DEFAULT_SCALE);
+  desktopScale = Number(scale) || DEFAULT_SCALE;
+  applyRendererScale();
 }
 
 function resizeCanvasToWindow() {
   canvas.width = Math.max(1, Math.round(window.innerWidth));
   canvas.height = Math.max(1, Math.round(window.innerHeight));
+  applyRendererScale();
   renderer.clear();
 }
 
-canvas.addEventListener("click", () => {
+canvas.addEventListener("click", (event) => {
+  if (runtimeMode === "taskbar" && event.detail >= 2) {
+    exitTaskbarModeFromRenderer();
+    return;
+  }
+
+  if (runtimeMode === "taskbar") {
+    return;
+  }
+
   if (suppressClick) {
     suppressClick = false;
     return;
@@ -76,7 +93,20 @@ canvas.addEventListener("click", () => {
   behavior.triggerInteraction();
 });
 
+canvas.addEventListener("dblclick", () => {
+  exitTaskbarModeFromRenderer();
+});
+
+window.addEventListener("dblclick", () => {
+  exitTaskbarModeFromRenderer();
+});
+
 canvas.addEventListener("pointerdown", (event) => {
+  if (runtimeMode === "taskbar") {
+    handleTaskbarPointerDown(event);
+    return;
+  }
+
   if (event.button !== 0) {
     return;
   }
@@ -125,6 +155,10 @@ canvas.addEventListener("pointercancel", (event) => {
 });
 
 resizeGrip.addEventListener("pointerdown", async (event) => {
+  if (runtimeMode === "taskbar") {
+    return;
+  }
+
   if (event.button !== 0) {
     return;
   }
@@ -166,6 +200,10 @@ resizeGrip.addEventListener("pointercancel", (event) => {
 
 window.addEventListener("contextmenu", (event) => {
   event.preventDefault();
+  if (runtimeMode === "taskbar") {
+    return;
+  }
+
   window.desktopPet.showPetContextMenu();
 });
 
@@ -176,6 +214,7 @@ window.desktopPet.onPetSelected((petRecord) => {
 });
 
 window.desktopPet.onMovementState((state) => {
+  setRuntimeMode(state?.mode === "taskbar" ? "taskbar" : "desktop");
   behavior.setMovementState(state);
 });
 
@@ -204,6 +243,55 @@ function tick(now) {
 resizeCanvasToWindow();
 await loadStartupState();
 requestAnimationFrame(tick);
+
+function setRuntimeMode(mode) {
+  runtimeMode = mode;
+  document.body.classList.toggle("taskbar-mode", runtimeMode === "taskbar");
+  applyRendererScale();
+}
+
+function applyRendererScale() {
+  if (runtimeMode === "taskbar") {
+    renderer.setScale(Math.max(0.01, canvas.height / CELL_HEIGHT));
+    return;
+  }
+
+  renderer.setScale(desktopScale);
+}
+
+function exitTaskbarModeFromRenderer() {
+  if (runtimeMode !== "taskbar") {
+    return;
+  }
+
+  void window.desktopPet.exitTaskbarMode();
+}
+
+function handleTaskbarPointerDown(event) {
+  if (event.button !== 0) {
+    return;
+  }
+
+  const now = performance.now();
+  const previous = taskbarClickCandidate;
+  taskbarClickCandidate = {
+    time: now,
+    screenX: event.screenX,
+    screenY: event.screenY
+  };
+
+  if (!previous) {
+    return;
+  }
+
+  const elapsedMs = now - previous.time;
+  const distance = Math.hypot(event.screenX - previous.screenX, event.screenY - previous.screenY);
+
+  if (elapsedMs <= TASKBAR_DOUBLE_CLICK_MS && distance <= TASKBAR_DOUBLE_CLICK_DISTANCE_PX) {
+    taskbarClickCandidate = null;
+    exitTaskbarModeFromRenderer();
+  }
+}
 
 async function finishDrag(event) {
   if (!dragSession || event.pointerId !== dragSession.pointerId) {

@@ -53,6 +53,10 @@ body {
   border-color: rgba(255, 255, 255, 0.56);
 }
 
+body.taskbar-mode #resizeGrip {
+  display: none;
+}
+
 .error-state {
   position: fixed;
   inset: 12px;

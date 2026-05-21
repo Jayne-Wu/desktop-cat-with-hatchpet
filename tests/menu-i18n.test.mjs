@@ -6,6 +6,7 @@ test("menu language defaults to Chinese", () => {
   assert.equal(DEFAULT_LANGUAGE, "zh-CN");
   assert.equal(normalizeLanguage(undefined), "zh-CN");
   assert.equal(getMenuText(undefined).companion, "陪伴风格");
+  assert.equal(getMenuText(undefined).taskbarRun, "在任务栏上慢跑");
 });
 
 test("menu language supports English labels", () => {
@@ -15,4 +16,6 @@ test("menu language supports English labels", () => {
   assert.equal(text.playful, "Playful");
   assert.equal(text.pin, "Pin");
   assert.equal(text.unpin, "Unpin");
+  assert.equal(text.taskbarRun, "Run on Taskbar");
+  assert.equal(text.backToDesktop, "Back to Desktop");
 });

@@ -8,7 +8,7 @@ The runtime has two cooperating layers:
 
 - Main process movement controller
   - decides where the pet window is on screen
-  - decides whether it is observing, settling, strolling, or rehoming
+  - decides whether it is observing, settling, strolling, rehoming, or running on the taskbar
   - emits a movement snapshot to the renderer
 - Renderer pet behavior
   - receives the movement snapshot
@@ -24,7 +24,8 @@ In practice, animation selection follows this priority:
 
 The important movement rule today is:
 
-- the pet only physically moves when the current animation is `running-left` or `running-right`
+- in normal desktop mode, the pet only physically moves when the current animation is `running-left` or `running-right`
+- in taskbar mode, horizontal taskbars also wait for directional running; side taskbars use `running` for vertical motion
 - all other states are visual-only and stay in place
 
 ## Trigger Sources
@@ -94,6 +95,7 @@ The movement controller emits snapshots with this shape:
 
 ```js
 {
+  mode,
   companionStyle,
   phase,
   locomotion,
@@ -143,6 +145,20 @@ Behavior:
 - does not animate the return with `running`
 - returns to `observe` immediately after snapping
 
+#### `taskbar`
+
+The pet runs over the Windows taskbar after the user chooses `Run on Taskbar` from the position menu.
+
+Behavior:
+
+- detects whether the taskbar is on the top, bottom, left, or right side by comparing display bounds with the work area
+- shrinks the window to the taskbar thickness before placing it over the taskbar
+- moves horizontally on top / bottom taskbars and vertically on left / right taskbars
+- disables the pet window context menu, dragging, resizing, and single-click interaction while active
+- exits back to normal desktop mode on double-click, with the tray menu as a fallback
+- keeps reasserting topmost z-order during taskbar mode so Windows taskbar interactions are less likely to cover the pet
+- restores the previous desktop bounds, minimum size, and pin state when leaving taskbar mode
+
 ### Edge territory
 
 The pet does not freely roam the entire desktop.
@@ -172,7 +188,7 @@ Current menu responsibilities:
 
 - pet switching
 - companion style switching
-- position reset
+- position reset and taskbar mode switching
 - language switching
 - bottom control group: `Pin / Unpin`, `Hide`, `Quit`
 

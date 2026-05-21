@@ -14,6 +14,8 @@ test("pin toggle lives with visibility controls and click through is removed", (
     onImportPet: noop,
     onSelectCompanionStyle: noop,
     onResetPosition: noop,
+    onEnterTaskbarMode: noop,
+    onExitTaskbarMode: noop,
     onTogglePin: noop,
     onSelectLanguage: noop,
     onVisibilityToggle: noop,
@@ -51,6 +53,8 @@ test("pet menu exposes import before pet choices", () => {
     onImportPet: noop,
     onSelectCompanionStyle: noop,
     onResetPosition: noop,
+    onEnterTaskbarMode: noop,
+    onExitTaskbarMode: noop,
     onTogglePin: noop,
     onSelectLanguage: noop,
     onVisibilityToggle: noop,
@@ -62,6 +66,54 @@ test("pet menu exposes import before pet choices", () => {
   assert.equal(petMenu.submenu[0].label, "Import Pet…");
   assert.equal(petMenu.submenu[1].type, "separator");
   assert.equal(petMenu.submenu[2].label, "Xigua");
+});
+
+test("position menu can switch into and out of taskbar mode", () => {
+  const desktopMenu = buildDesktopPetMenuTemplate({
+    mainWindow: fakeWindow(),
+    pets: [],
+    selectedPetId: null,
+    companionStyle: "curious",
+    language: "en-US",
+    visibilityLabel: "Hide",
+    onSelectPet: noop,
+    onImportPet: noop,
+    onSelectCompanionStyle: noop,
+    onResetPosition: noop,
+    onEnterTaskbarMode: noop,
+    onExitTaskbarMode: noop,
+    onTogglePin: noop,
+    onSelectLanguage: noop,
+    onVisibilityToggle: noop,
+    onQuit: noop
+  });
+  const taskbarMenu = buildDesktopPetMenuTemplate({
+    mainWindow: fakeWindow(),
+    pets: [],
+    selectedPetId: null,
+    companionStyle: "curious",
+    language: "en-US",
+    visibilityLabel: "Hide",
+    onSelectPet: noop,
+    onImportPet: noop,
+    onSelectCompanionStyle: noop,
+    onResetPosition: noop,
+    onEnterTaskbarMode: noop,
+    onExitTaskbarMode: noop,
+    onTogglePin: noop,
+    onSelectLanguage: noop,
+    onVisibilityToggle: noop,
+    onQuit: noop,
+    taskbarMode: true
+  });
+
+  const desktopPosition = desktopMenu.find((item) => item.label === "Position");
+  const taskbarPosition = taskbarMenu.find((item) => item.label === "Position");
+
+  assert.equal(desktopPosition.submenu.at(-1).label, "Run on Taskbar");
+  assert.equal(taskbarPosition.submenu[0].enabled, false);
+  assert.equal(taskbarPosition.submenu[1].enabled, false);
+  assert.equal(taskbarPosition.submenu.at(-1).label, "Back to Desktop");
 });
 
 function fakeWindow() {
